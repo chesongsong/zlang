@@ -2,19 +2,17 @@ import { createApp, defineComponent, h } from "vue";
 import { ElTable, ElTableColumn } from "element-plus";
 import "element-plus/es/components/table/style/css";
 import "element-plus/es/components/table-column/style/css";
-import type { ComponentRenderer, Disposable } from "@z-lang/render";
-import type { ZTable } from "@z-lang/render";
-import { formatValue } from "@z-lang/render";
+import type { ComponentRenderer, Disposable, RenderTable } from "@z-lang/render";
 
-export class ElementTableRenderer implements ComponentRenderer<ZTable> {
-  render(value: ZTable, container: HTMLElement): Disposable {
+export class ElementTableRenderer implements ComponentRenderer<RenderTable> {
+  render(value: RenderTable, container: HTMLElement): Disposable {
     const rowCount = value.columns[0]?.values.length ?? 0;
     const rows: Record<string, string>[] = [];
 
     for (let i = 0; i < rowCount; i++) {
       const row: Record<string, string> = { _index: String(i + 1) };
       for (const col of value.columns) {
-        row[col.name] = formatValue(col.values[i] ?? null);
+        row[col.name] = String(col.values[i] ?? "");
       }
       rows.push(row);
     }

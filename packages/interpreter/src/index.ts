@@ -19,6 +19,15 @@ export {
   isCallable,
 } from "./values.js";
 
+export {
+  type RenderTable,
+  type RenderColumn,
+  box,
+  unbox,
+  unboxTable,
+  format,
+} from "./bridge.js";
+
 import { Interpreter } from "./interpreter.js";
 import type { Program } from "@z-lang/types";
 import type { ScopeResult } from "./values.js";

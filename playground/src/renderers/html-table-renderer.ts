@@ -1,9 +1,7 @@
-import type { ComponentRenderer, Disposable } from "@z-lang/render";
-import type { ZTable } from "@z-lang/render";
-import { formatValue } from "@z-lang/render";
+import type { ComponentRenderer, Disposable, RenderTable } from "@z-lang/render";
 
-export class HtmlTableRenderer implements ComponentRenderer<ZTable> {
-  render(value: ZTable, container: HTMLElement): Disposable {
+export class HtmlTableRenderer implements ComponentRenderer<RenderTable> {
+  render(value: RenderTable, container: HTMLElement): Disposable {
     const table = document.createElement("table");
     table.className = "zlang-table";
 
@@ -35,7 +33,7 @@ export class HtmlTableRenderer implements ComponentRenderer<ZTable> {
 
       for (const col of value.columns) {
         const td = document.createElement("td");
-        td.textContent = formatValue(col.values[i] ?? null);
+        td.textContent = String(col.values[i] ?? "");
         tr.appendChild(td);
       }
       tbody.appendChild(tr);

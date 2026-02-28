@@ -10,6 +10,10 @@ export { type ASTVisitor, visitNode } from "@z-lang/ast";
 export { Interpreter, execute, formatValue, isZTable } from "@z-lang/interpreter";
 export type { ZValue, ZObject, ZFunction, ZArrowFunction, ZTable, TableColumn, ScopeResult, OutputSegment, MarkdownSegment, ScopeSegment } from "@z-lang/interpreter";
 
+// Box/Unbox boundary — JS <-> z-lang value conversion
+export { box, unbox, unboxTable, format } from "@z-lang/interpreter";
+export type { RenderTable, RenderColumn } from "@z-lang/interpreter";
+
 // All types
 export type {
   Position,

@@ -1,5 +1,5 @@
 import type { OutputSegment, ZValue } from "@z-lang/interpreter";
-import { formatValue, isZTable } from "@z-lang/interpreter";
+import { isZTable, unboxTable, format } from "@z-lang/interpreter";
 import type { ComponentFactory, Disposable } from "./types.js";
 
 export class RenderEngine {
@@ -68,17 +68,18 @@ export class RenderEngine {
     const value = result.value;
 
     if (isZTable(value)) {
+      const renderTable = unboxTable(value);
       const wrapper = document.createElement("div");
       wrapper.className = "render-segment render-table";
       container.appendChild(wrapper);
 
       const renderer = this.factory.createTableRenderer();
-      const disposable = renderer.render(value, wrapper);
+      const disposable = renderer.render(renderTable, wrapper);
       this.disposables.push(disposable);
       return;
     }
 
-    const formatted = formatValue(value);
+    const formatted = format(value);
     const wrapper = document.createElement("div");
     wrapper.className = "render-segment render-markdown";
     container.appendChild(wrapper);
