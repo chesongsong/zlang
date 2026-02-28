@@ -1,10 +1,14 @@
 // High-level API
-export { parse, tokenize } from "./zlang.js";
-export type { ParseOptions, ParseOutput } from "./zlang.js";
+export { parse, run, tokenize } from "./zlang.js";
+export type { ParseOptions, ParseOutput, RunOutput } from "./zlang.js";
 
 // AST builder, scope resolver & visitor
 export { ASTBuilder, ScopeResolver } from "@z-lang/ast";
 export { type ASTVisitor, visitNode } from "@z-lang/ast";
+
+// Interpreter
+export { Interpreter, execute, formatValue } from "@z-lang/interpreter";
+export type { ZValue, ZObject, ZFunction, ZArrowFunction, ScopeResult } from "@z-lang/interpreter";
 
 // All types
 export type {
@@ -27,6 +31,8 @@ export type {
   WhileStatement,
   ForStatement,
   ReturnStatement,
+  BreakStatement,
+  ContinueStatement,
   ExpressionStatement,
   BlockStatement,
   Statement,

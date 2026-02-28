@@ -21,6 +21,8 @@ export type {
   WhileStatement,
   ForStatement,
   ReturnStatement,
+  BreakStatement,
+  ContinueStatement,
   ExpressionStatement,
   BlockStatement,
   Statement,

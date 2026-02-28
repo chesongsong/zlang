@@ -6,9 +6,6 @@
   },
   "include": ["src"],
   "references": [
-    { "path": "../types" },
-    { "path": "../parser" },
-    { "path": "../ast" },
-    { "path": "../interpreter" }
+    { "path": "../types" }
   ]
 }

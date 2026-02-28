@@ -7,6 +7,8 @@ import type {
   WhileStatement,
   ForStatement,
   ReturnStatement,
+  BreakStatement,
+  ContinueStatement,
   ExpressionStatement,
   BlockStatement,
   NumberLiteral,
@@ -35,6 +37,8 @@ export interface ASTVisitor<R = void> {
   visitWhileStatement(node: WhileStatement): R;
   visitForStatement(node: ForStatement): R;
   visitReturnStatement(node: ReturnStatement): R;
+  visitBreakStatement(node: BreakStatement): R;
+  visitContinueStatement(node: ContinueStatement): R;
   visitExpressionStatement(node: ExpressionStatement): R;
   visitBlockStatement(node: BlockStatement): R;
 
@@ -75,6 +79,10 @@ export function visitNode<R>(
       return visitor.visitForStatement(node as ForStatement);
     case "ReturnStatement":
       return visitor.visitReturnStatement(node as ReturnStatement);
+    case "BreakStatement":
+      return visitor.visitBreakStatement(node as BreakStatement);
+    case "ContinueStatement":
+      return visitor.visitContinueStatement(node as ContinueStatement);
     case "ExpressionStatement":
       return visitor.visitExpressionStatement(node as ExpressionStatement);
     case "BlockStatement":

@@ -53,6 +53,8 @@ export class ScopeResolver {
       case "ReturnStatement":
         return this.resolveReturnStatement(stmt);
       case "VariableDeclaration":
+      case "BreakStatement":
+      case "ContinueStatement":
         return stmt;
     }
   }

@@ -4,6 +4,7 @@
     { "path": "packages/types" },
     { "path": "packages/parser" },
     { "path": "packages/ast" },
+    { "path": "packages/interpreter" },
     { "path": "packages/core" }
   ]
 }

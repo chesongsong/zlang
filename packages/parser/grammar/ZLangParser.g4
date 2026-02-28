@@ -27,11 +27,11 @@ statement
     | breakStatement
     | continueStatement
     | expressionStatement
-    | block
+    | block SEMI?
     ;
 
 functionDeclaration
-    : FN IDENTIFIER LPAREN parameterList? RPAREN (COLON typeAnnotation)? block
+    : IDENTIFIER LPAREN parameterList? RPAREN block SEMI?
     ;
 
 parameterList
@@ -55,15 +55,15 @@ baseType
     ;
 
 ifStatement
-    : IF LPAREN expression RPAREN block (ELSE (ifStatement | block))?
+    : IF LPAREN expression RPAREN block (SEMI? ELSE (ifStatement | block))? SEMI?
     ;
 
 whileStatement
-    : WHILE LPAREN expression RPAREN block
+    : WHILE LPAREN expression RPAREN block SEMI?
     ;
 
 forStatement
-    : FOR LPAREN expression SEMI expression SEMI expression RPAREN block
+    : FOR LPAREN expression SEMI expression SEMI expression RPAREN block SEMI?
     ;
 
 returnStatement
@@ -179,7 +179,7 @@ propertyKey
     ;
 
 arrowFunction
-    : FN LPAREN parameterList? RPAREN (COLON typeAnnotation)? ARROW
+    : FN LPAREN parameterList? RPAREN ARROW
       ( expression
       | block
       )

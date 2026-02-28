@@ -367,6 +367,70 @@ html, body {
   text-align: center;
 }
 
+/* Scope cards */
+.scope-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.scope-card.scope-error {
+  border-color: rgba(248, 81, 73, 0.4);
+}
+
+.scope-header {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.scope-body {
+  padding: 12px 14px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.scope-body-error {
+  color: var(--red);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 12px 14px;
+}
+
+.scope-value {
+  color: var(--green);
+  word-break: break-all;
+}
+
+.scope-type {
+  color: var(--text-muted);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.scope-empty {
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 20px;
+  text-align: center;
+}
+
+.scope-errors {
+  margin-bottom: 16px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   #main {

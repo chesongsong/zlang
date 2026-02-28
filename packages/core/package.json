@@ -26,6 +26,7 @@
     "@z-lang/types": "*",
     "@z-lang/parser": "*",
     "@z-lang/ast": "*",
+    "@z-lang/interpreter": "*",
     "antlr4ng": "^3.0.16"
   }
 }

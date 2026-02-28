@@ -43,7 +43,6 @@ export interface FunctionDeclaration extends BaseNode {
   readonly type: "FunctionDeclaration";
   readonly name: string;
   readonly params: readonly Parameter[];
-  readonly returnType?: TypeAnnotationNode;
   readonly body: BlockStatement;
 }
 
@@ -73,6 +72,14 @@ export interface ReturnStatement extends BaseNode {
   readonly argument?: Expression;
 }
 
+export interface BreakStatement extends BaseNode {
+  readonly type: "BreakStatement";
+}
+
+export interface ContinueStatement extends BaseNode {
+  readonly type: "ContinueStatement";
+}
+
 export interface ExpressionStatement extends BaseNode {
   readonly type: "ExpressionStatement";
   readonly expression: Expression;
@@ -90,6 +97,8 @@ export type Statement =
   | WhileStatement
   | ForStatement
   | ReturnStatement
+  | BreakStatement
+  | ContinueStatement
   | ExpressionStatement
   | BlockStatement;
 
@@ -193,7 +202,6 @@ export interface ObjectExpression extends BaseNode {
 export interface ArrowFunctionExpression extends BaseNode {
   readonly type: "ArrowFunctionExpression";
   readonly params: readonly Parameter[];
-  readonly returnType?: TypeAnnotationNode;
   readonly body: Expression | BlockStatement;
 }
 

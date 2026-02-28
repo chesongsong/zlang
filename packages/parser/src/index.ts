@@ -9,10 +9,12 @@ import type { ProgramContext } from "./generated/ZLangParser.js";
 import { LexerError, ParseError } from "@z-lang/types";
 import type { SourceLocation } from "@z-lang/types";
 import { ZLangErrorListener } from "./error-listener.js";
+import { AutoSemicolonTokenSource } from "./auto-semicolon.js";
 
 export { ZLangLexer } from "./generated/ZLangLexer.js";
 export { ZLangParser } from "./generated/ZLangParser.js";
 export type { ProgramContext } from "./generated/ZLangParser.js";
+export { AutoSemicolonTokenSource } from "./auto-semicolon.js";
 
 export interface ParseResult {
   readonly tree: ProgramContext;
@@ -28,10 +30,9 @@ export interface TokenInfo {
   readonly channel: number;
 }
 
-export function createLexer(source: string, sourceName?: string): ZLangLexer {
+export function createLexer(source: string): ZLangLexer {
   const chars = CharStream.fromString(source);
-  const lexer = new ZLangLexer(chars);
-  return lexer;
+  return new ZLangLexer(chars);
 }
 
 export function tokenize(source: string): readonly TokenInfo[] {
@@ -40,7 +41,8 @@ export function tokenize(source: string): readonly TokenInfo[] {
   lexer.removeErrorListeners();
   lexer.addErrorListener(errorListener);
 
-  const stream = new CommonTokenStream(lexer);
+  const asi = new AutoSemicolonTokenSource(lexer);
+  const stream = new CommonTokenStream(asi);
   stream.fill();
 
   if (errorListener.errors.length > 0) {
@@ -69,7 +71,8 @@ export function parse(source: string): ParseResult {
   lexer.removeErrorListeners();
   lexer.addErrorListener(lexerErrorListener);
 
-  const tokens = new CommonTokenStream(lexer);
+  const asi = new AutoSemicolonTokenSource(lexer);
+  const tokens = new CommonTokenStream(asi);
   const parser = new ZLangParser(tokens);
 
   const parserErrorListener = new ZLangErrorListener();

@@ -125,19 +125,11 @@ export class ASTBuilder {
         return this.buildStatement(child);
       }
     }
-    if (
-      ruleIndex === ZLangParser.RULE_breakStatement ||
-      ruleIndex === ZLangParser.RULE_continueStatement
-    ) {
-      return {
-        type: "ExpressionStatement",
-        expression: {
-          type: "Identifier",
-          name: ctx.start!.text ?? "",
-          loc: loc(ctx),
-        },
-        loc: loc(ctx),
-      };
+    if (ruleIndex === ZLangParser.RULE_breakStatement) {
+      return { type: "BreakStatement", loc: loc(ctx) };
+    }
+    if (ruleIndex === ZLangParser.RULE_continueStatement) {
+      return { type: "ContinueStatement", loc: loc(ctx) };
     }
 
     return null;
@@ -150,14 +142,12 @@ export class ASTBuilder {
     const paramListCtx = this.findRuleChild(ctx, ZLangParser.RULE_parameterList);
     const params = paramListCtx ? this.buildParameterList(paramListCtx) : [];
 
-    const typeAnno = this.findRuleChild(ctx, ZLangParser.RULE_typeAnnotation);
     const blockCtx = this.findRuleChild(ctx, ZLangParser.RULE_block)!;
 
     return {
       type: "FunctionDeclaration",
       name,
       params,
-      returnType: typeAnno ? this.buildTypeAnnotation(typeAnno) : undefined,
       body: this.buildBlock(blockCtx),
       loc: loc(ctx),
     };
@@ -583,7 +573,6 @@ export class ASTBuilder {
     const paramListCtx = this.findRuleChild(ctx, ZLangParser.RULE_parameterList);
     const params = paramListCtx ? this.buildParameterList(paramListCtx) : [];
 
-    const typeAnno = this.findRuleChild(ctx, ZLangParser.RULE_typeAnnotation);
     const blockCtx = this.findRuleChild(ctx, ZLangParser.RULE_block);
     const exprCtx = this.findRuleChild(ctx, ZLangParser.RULE_expression);
 
@@ -596,7 +585,6 @@ export class ASTBuilder {
     return {
       type: "ArrowFunctionExpression",
       params,
-      returnType: typeAnno ? this.buildTypeAnnotation(typeAnno) : undefined,
       body,
       loc: loc(ctx),
     };
