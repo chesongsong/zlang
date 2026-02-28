@@ -1,14 +1,57 @@
+import * as monaco from "monaco-editor";
+import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import { run } from "@z-lang/core";
 import { EXAMPLES } from "./examples";
 import { renderSegments } from "./renderer";
+import { registerZLang, createZLangTheme, ZLANG_ID } from "./monaco-lang";
 import "./style.css";
 
-const editor = document.getElementById("editor") as HTMLTextAreaElement;
+self.MonacoEnvironment = {
+  getWorker() {
+    return new editorWorker();
+  },
+};
+
+registerZLang();
+createZLangTheme();
+
+const editorContainer = document.getElementById("editor")!;
 const status = document.getElementById("status")!;
 const select = document.getElementById("example-select") as HTMLSelectElement;
 const runBtn = document.getElementById("run-btn")!;
 const output = document.getElementById("output-content")!;
 const divider = document.getElementById("divider")!;
+
+const editor = monaco.editor.create(editorContainer, {
+  value: EXAMPLES[0]!.code,
+  language: ZLANG_ID,
+  theme: "zlang-dark",
+  fontSize: 14,
+  lineHeight: 1.6,
+  fontFamily:
+    '"SF Mono", "Cascadia Code", "Fira Code", "JetBrains Mono", Consolas, monospace',
+  minimap: { enabled: false },
+  scrollBeyondLastLine: false,
+  padding: { top: 12, bottom: 12 },
+  automaticLayout: true,
+  tabSize: 2,
+  renderLineHighlight: "line",
+  cursorBlinking: "smooth",
+  cursorSmoothCaretAnimation: "on",
+  smoothScrolling: true,
+  bracketPairColorization: { enabled: true },
+  guides: { indentation: true, bracketPairs: true },
+  wordWrap: "on",
+  contextmenu: true,
+  suggest: { showKeywords: true },
+  overviewRulerLanes: 0,
+  hideCursorInOverviewRuler: true,
+  overviewRulerBorder: false,
+  scrollbar: {
+    verticalScrollbarSize: 8,
+    horizontalScrollbarSize: 8,
+  },
+});
 
 for (const ex of EXAMPLES) {
   const opt = document.createElement("option");
@@ -20,13 +63,13 @@ for (const ex of EXAMPLES) {
 select.addEventListener("change", () => {
   const found = EXAMPLES.find((e) => e.name === select.value);
   if (found) {
-    editor.value = found.code;
+    editor.setValue(found.code);
     execute();
   }
 });
 
 function execute() {
-  const source = editor.value;
+  const source = editor.getValue();
   const startTime = performance.now();
 
   try {
@@ -46,28 +89,18 @@ function execute() {
     const message = err instanceof Error ? err.message : String(err);
     status.textContent = "✗ Fatal error";
     status.className = "status err";
-    output.innerHTML = `<div class="error-item">${escape(message)}</div>`;
+    output.innerHTML = `<div class="error-item">${escapeHtml(message)}</div>`;
   }
 }
 
 runBtn.addEventListener("click", execute);
 
-editor.addEventListener("keydown", (e) => {
-  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-    e.preventDefault();
-    execute();
-  }
-  if (e.key === "Tab") {
-    e.preventDefault();
-    const start = editor.selectionStart;
-    const end = editor.selectionEnd;
-    editor.value = editor.value.substring(0, start) + "  " + editor.value.substring(end);
-    editor.selectionStart = editor.selectionEnd = start + 2;
-  }
+editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+  execute();
 });
 
 let debounceTimer: ReturnType<typeof setTimeout>;
-editor.addEventListener("input", () => {
+editor.onDidChangeModelContent(() => {
   clearTimeout(debounceTimer);
   debounceTimer = setTimeout(execute, 300);
 });
@@ -96,11 +129,9 @@ document.addEventListener("mouseup", () => {
   divider.classList.remove("dragging");
 });
 
-editor.value = EXAMPLES[0]!.code;
-editor.placeholder = "// 输入 z-lang 代码...";
 execute();
 
-function escape(str: string): string {
+function escapeHtml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")

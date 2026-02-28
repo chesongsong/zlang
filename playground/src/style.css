@@ -147,21 +147,8 @@ html, body {
 
 #editor {
   flex: 1;
-  resize: none;
-  background: var(--bg-input);
-  color: var(--text);
-  border: none;
-  padding: 16px;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.6;
-  tab-size: 2;
-  outline: none;
-  overflow: auto;
-}
-
-#editor::placeholder {
-  color: var(--text-muted);
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* Divider */
