@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/types" },
+    { "path": "packages/parser" },
+    { "path": "packages/ast" },
+    { "path": "packages/core" }
+  ]
+}

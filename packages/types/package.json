@@ -1,0 +1,12 @@
+{
+  "name": "@z-lang/types",
+  "version": "0.1.0",
+  "description": "TypeScript type definitions for z-lang AST, tokens, and errors",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc --build"
+  }
+}

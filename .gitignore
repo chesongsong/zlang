@@ -1,0 +1,18 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# ANTLR4 generated files
+packages/parser/src/generated/*.ts
+packages/parser/src/generated/*.js
+packages/parser/src/generated/*.interp
+packages/parser/src/generated/*.tokens
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo

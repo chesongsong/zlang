@@ -1,0 +1,31 @@
+{
+  "name": "z-lang",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A JavaScript-like language built with ANTLR4",
+  "workspaces": [
+    "packages/types",
+    "packages/parser",
+    "packages/ast",
+    "packages/core"
+  ],
+  "scripts": {
+    "generate": "antlr-ng -Dlanguage=TypeScript -v -o packages/parser/src/generated --exact-output-dir packages/parser/grammar/ZLangLexer.g4 packages/parser/grammar/ZLangParser.g4",
+    "build:ts": "tsc --build tsconfig.json",
+    "build:bundle": "node scripts/build.mjs",
+    "build": "npm run generate && npm run build:ts && npm run build:bundle",
+    "clean": "rm -rf packages/*/dist packages/parser/src/generated/*.ts packages/parser/src/generated/*.interp packages/parser/src/generated/*.tokens"
+  },
+  "devDependencies": {
+    "antlr-ng": "^1.0.10",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0"
+  },
+  "dependencies": {
+    "antlr4ng": "^3.0.16"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
+}
