@@ -27,6 +27,8 @@ import type {
   Parameter,
   Property,
   TypeAnnotationNode,
+  NamedArgument,
+  CallArgument,
 } from "@z-lang/types";
 import { ASTBuildError } from "@z-lang/types";
 
@@ -454,13 +456,14 @@ export class ASTBuilder {
     }
 
     if (firstText === "(") {
-      const args: Expression[] = [];
+      const args: CallArgument[] = [];
       const argListCtx = children[1];
       if (argListCtx instanceof ParserRuleContext &&
           argListCtx.ruleIndex === ZLangParser.RULE_argumentList) {
         for (const child of argListCtx.children ?? []) {
-          if (child instanceof ParserRuleContext) {
-            args.push(this.buildExpression(child));
+          if (child instanceof ParserRuleContext &&
+              child.ruleIndex === ZLangParser.RULE_argument) {
+            args.push(this.buildArgument(child));
           }
         }
       }
@@ -588,6 +591,51 @@ export class ASTBuilder {
       body,
       loc: loc(ctx),
     };
+  }
+
+  // -----------------------------------------------------------------------
+  // Arguments
+  // -----------------------------------------------------------------------
+
+  private buildArgument(ctx: ParserRuleContext): CallArgument {
+    const children = ctx.children ?? [];
+
+    if (children.length === 3) {
+      const first = children[0]!;
+      const secondText = children[1]?.getText();
+
+      if (secondText === "=") {
+        const exprCtx = children[2];
+        if (!(exprCtx instanceof ParserRuleContext)) {
+          throw new ASTBuildError("Invalid named argument value", loc(ctx));
+        }
+
+        const firstText = first.getText();
+        let name: string;
+
+        if (first instanceof ParserRuleContext) {
+          name = firstText;
+        } else if (firstText.startsWith('"') || firstText.startsWith("'")) {
+          name = firstText.slice(1, -1);
+        } else {
+          name = firstText;
+        }
+
+        return {
+          type: "NamedArgument",
+          name,
+          value: this.buildExpression(exprCtx),
+          loc: loc(ctx),
+        } as NamedArgument;
+      }
+    }
+
+    const exprChild = children[0];
+    if (exprChild instanceof ParserRuleContext) {
+      return this.buildExpression(exprChild);
+    }
+
+    throw new ASTBuildError("Invalid argument", loc(ctx));
   }
 
   // -----------------------------------------------------------------------

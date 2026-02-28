@@ -141,7 +141,13 @@ postfixOp
     ;
 
 argumentList
-    : expression (COMMA expression)*
+    : argument (COMMA argument)*
+    ;
+
+argument
+    : IDENTIFIER ASSIGN expression
+    | STRING ASSIGN expression
+    | expression
     ;
 
 // =========================================================================

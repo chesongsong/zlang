@@ -20,11 +20,14 @@ import type {
   ArrayExpression,
   ObjectExpression,
   ArrowFunctionExpression,
+  NamedArgument,
 } from "@z-lang/types";
 import { Environment } from "./environment.js";
 import {
   type ZValue,
   type ZObject,
+  type ZTable,
+  type TableColumn,
   type ScopeResult,
   ReturnSignal,
   BreakSignal,
@@ -364,12 +367,19 @@ export class Interpreter {
   }
 
   private evaluateCall(expr: CallExpression, env: Environment): ZValue {
+    if (expr.callee.type === "Identifier" && expr.callee.name === "rtable") {
+      return this.evaluateRtable(expr, env);
+    }
+
     const callee = this.evaluate(expr.callee, env);
     if (!isCallable(callee)) {
       throw new Error("Not a function");
     }
 
-    const args = expr.arguments.map((a) => this.evaluate(a, env));
+    const args = expr.arguments.map((a) => {
+      if (a.type === "NamedArgument") return this.evaluate(a.value, env);
+      return this.evaluate(a, env);
+    });
     const callEnv = new Environment(callee.closure);
     for (let i = 0; i < callee.params.length; i++) {
       callEnv.define(callee.params[i]!, args[i] ?? null);
@@ -392,6 +402,51 @@ export class Interpreter {
       if (e instanceof ReturnSignal) return e.value;
       throw e;
     }
+  }
+
+  private evaluateRtable(expr: CallExpression, env: Environment): ZValue {
+    const allArgs = expr.arguments;
+    if (allArgs.length < 1) {
+      throw new Error("rtable requires at least 1 argument (data source)");
+    }
+
+    const firstArg = allArgs[0]!;
+    if (firstArg.type === "NamedArgument") {
+      throw new Error("rtable first argument must be a data source, not a named argument");
+    }
+
+    const recordsVal = this.evaluate(firstArg, env);
+    if (!Array.isArray(recordsVal)) {
+      throw new Error("rtable first argument must be an array");
+    }
+
+    const namedArgs: NamedArgument[] = [];
+    for (let i = 1; i < allArgs.length; i++) {
+      const arg = allArgs[i]!;
+      if (arg.type !== "NamedArgument") {
+        throw new Error("rtable column definitions must be named arguments (name = expression)");
+      }
+      namedArgs.push(arg);
+    }
+
+    const columns: TableColumn[] = namedArgs.map((na) => {
+      const values: ZValue[] = recordsVal.map((record) => {
+        const recordEnv = new Environment(env);
+
+        if (isZObject(record)) {
+          for (const [key, val] of Object.entries(record.entries)) {
+            recordEnv.define(key, val);
+          }
+          recordEnv.define("自己", record);
+        }
+
+        return this.evaluate(na.value, recordEnv);
+      });
+
+      return { name: na.name, values };
+    });
+
+    return { __kind: "table", columns } as ZTable;
   }
 
   private evaluateMember(expr: MemberExpression, env: Environment): ZValue {

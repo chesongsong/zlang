@@ -13,6 +13,7 @@ import type {
   VariableDeclaration,
   AssignmentExpression,
   Identifier,
+  CallArgument,
 } from "@z-lang/types";
 
 export class ScopeResolver {
@@ -180,7 +181,7 @@ export class ScopeResolver {
         return {
           ...expr,
           callee: this.resolveExpression(expr.callee),
-          arguments: expr.arguments.map((a) => this.resolveExpression(a)),
+          arguments: expr.arguments.map((a) => this.resolveCallArgument(a)),
         };
       case "MemberExpression":
         return {
@@ -221,6 +222,13 @@ export class ScopeResolver {
       default:
         return expr;
     }
+  }
+
+  private resolveCallArgument(arg: CallArgument): CallArgument {
+    if (arg.type === "NamedArgument") {
+      return { ...arg, value: this.resolveExpression(arg.value) };
+    }
+    return this.resolveExpression(arg);
   }
 
   // -----------------------------------------------------------------------

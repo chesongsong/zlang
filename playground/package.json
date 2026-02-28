@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@z-lang/core": "*",
+    "@z-lang/render": "*",
     "monaco-editor": "^0.55.1"
   },
   "devDependencies": {

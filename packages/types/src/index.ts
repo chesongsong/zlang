@@ -37,6 +37,8 @@ export type {
   UnaryExpression,
   AssignmentOperator,
   AssignmentExpression,
+  NamedArgument,
+  CallArgument,
   CallExpression,
   MemberExpression,
   IndexExpression,

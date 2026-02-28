@@ -8,6 +8,7 @@
     "packages/parser",
     "packages/ast",
     "packages/interpreter",
+    "packages/render",
     "packages/core",
     "playground"
   ],

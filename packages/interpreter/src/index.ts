@@ -5,6 +5,8 @@ export {
   type ZObject,
   type ZFunction,
   type ZArrowFunction,
+  type ZTable,
+  type TableColumn,
   type ScopeResult,
   type MarkdownSegment,
   type ScopeSegment,
@@ -13,6 +15,7 @@ export {
   isZObject,
   isZFunction,
   isZArrowFunction,
+  isZTable,
   isCallable,
 } from "./values.js";
 

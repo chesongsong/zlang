@@ -171,10 +171,18 @@ export interface AssignmentExpression extends BaseNode {
   readonly value: Expression;
 }
 
+export interface NamedArgument extends BaseNode {
+  readonly type: "NamedArgument";
+  readonly name: string;
+  readonly value: Expression;
+}
+
+export type CallArgument = Expression | NamedArgument;
+
 export interface CallExpression extends BaseNode {
   readonly type: "CallExpression";
   readonly callee: Expression;
-  readonly arguments: readonly Expression[];
+  readonly arguments: readonly CallArgument[];
 }
 
 export interface MemberExpression extends BaseNode {
@@ -225,4 +233,4 @@ export type Expression =
 // Union of all AST nodes
 // ---------------------------------------------------------------------------
 
-export type Node = Program | ScopeBlock | Statement | Expression;
+export type Node = Program | ScopeBlock | Statement | Expression | NamedArgument;

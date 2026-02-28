@@ -25,6 +25,7 @@ import type {
   ArrayExpression,
   ObjectExpression,
   ArrowFunctionExpression,
+  NamedArgument,
 } from "@z-lang/types";
 
 export interface ASTVisitor<R = void> {
@@ -56,6 +57,7 @@ export interface ASTVisitor<R = void> {
   visitArrayExpression(node: ArrayExpression): R;
   visitObjectExpression(node: ObjectExpression): R;
   visitArrowFunctionExpression(node: ArrowFunctionExpression): R;
+  visitNamedArgument(node: NamedArgument): R;
 }
 
 export function visitNode<R>(
@@ -115,6 +117,8 @@ export function visitNode<R>(
       return visitor.visitObjectExpression(node as ObjectExpression);
     case "ArrowFunctionExpression":
       return visitor.visitArrowFunctionExpression(node as ArrowFunctionExpression);
+    case "NamedArgument":
+      return visitor.visitNamedArgument(node as NamedArgument);
     default:
       throw new Error(`Unknown node type: ${node.type}`);
   }

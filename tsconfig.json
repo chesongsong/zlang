@@ -5,6 +5,7 @@
     { "path": "packages/parser" },
     { "path": "packages/ast" },
     { "path": "packages/interpreter" },
+    { "path": "packages/render" },
     { "path": "packages/core" }
   ]
 }

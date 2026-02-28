@@ -7,8 +7,8 @@ export { ASTBuilder, ScopeResolver } from "@z-lang/ast";
 export { type ASTVisitor, visitNode } from "@z-lang/ast";
 
 // Interpreter
-export { Interpreter, execute, formatValue } from "@z-lang/interpreter";
-export type { ZValue, ZObject, ZFunction, ZArrowFunction, ScopeResult, OutputSegment, MarkdownSegment, ScopeSegment } from "@z-lang/interpreter";
+export { Interpreter, execute, formatValue, isZTable } from "@z-lang/interpreter";
+export type { ZValue, ZObject, ZFunction, ZArrowFunction, ZTable, TableColumn, ScopeResult, OutputSegment, MarkdownSegment, ScopeSegment } from "@z-lang/interpreter";
 
 // All types
 export type {
@@ -47,6 +47,8 @@ export type {
   UnaryExpression,
   AssignmentOperator,
   AssignmentExpression,
+  NamedArgument,
+  CallArgument,
   CallExpression,
   MemberExpression,
   IndexExpression,

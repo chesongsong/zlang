@@ -9,7 +9,18 @@ export type ZValue =
   | ZValue[]
   | ZObject
   | ZFunction
-  | ZArrowFunction;
+  | ZArrowFunction
+  | ZTable;
+
+export interface ZTable {
+  readonly __kind: "table";
+  readonly columns: readonly TableColumn[];
+}
+
+export interface TableColumn {
+  readonly name: string;
+  readonly values: readonly ZValue[];
+}
 
 export interface ZObject {
   readonly __kind: "object";
@@ -68,6 +79,10 @@ export function isZArrowFunction(v: ZValue): v is ZArrowFunction {
   return v !== null && typeof v === "object" && !Array.isArray(v) && "__kind" in v && v.__kind === "arrow";
 }
 
+export function isZTable(v: ZValue): v is ZTable {
+  return v !== null && typeof v === "object" && !Array.isArray(v) && "__kind" in v && v.__kind === "table";
+}
+
 export function isCallable(v: ZValue): v is ZFunction | ZArrowFunction {
   return isZFunction(v) || isZArrowFunction(v);
 }
@@ -82,6 +97,9 @@ export function formatValue(v: ZValue): string {
   }
   if (isZFunction(v)) return `fn ${v.name}(${v.params.join(", ")})`;
   if (isZArrowFunction(v)) return `fn(${v.params.join(", ")}) => ...`;
+  if (isZTable(v)) {
+    return `[Table: ${v.columns.length} columns, ${v.columns[0]?.values.length ?? 0} rows]`;
+  }
   if (isZObject(v)) {
     const entries = Object.entries(v.entries);
     if (entries.length === 0) return "{}";

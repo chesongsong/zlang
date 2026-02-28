@@ -1,8 +1,8 @@
 import * as monaco from "monaco-editor";
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import { run } from "@z-lang/core";
-import { EXAMPLES } from "./examples";
-import { renderSegments } from "./renderer";
+import { RenderEngine } from "@z-lang/render";
+import { HtmlComponentFactory } from "./renderers/html-factory";
 import { registerZLang, createZLangTheme, ZLANG_ID } from "./monaco-lang";
 import "./style.css";
 
@@ -16,16 +16,29 @@ registerZLang();
 createZLangTheme();
 
 const editorContainer = document.getElementById("editor")!;
-const status = document.getElementById("status")!;
-const select = document.getElementById("example-select") as HTMLSelectElement;
-const runBtn = document.getElementById("run-btn")!;
 const output = document.getElementById("output-content")!;
 const divider = document.getElementById("divider")!;
 
+const factory = new HtmlComponentFactory();
+const renderEngine = new RenderEngine(factory);
+
+const DEFAULT_CODE = `# z-lang Playground
+
+在下方编写 z-lang 代码：
+
+\`\`\`
+变量A = 9999
+records = [{ 变量A: 1, 名字: "Alice" }, { 变量A: 2, 名字: "Bob" }, { 变量A: 3, 名字: "Charlie" }]
+TB = rtable(records, 输出1 = 变量A, 名字 = 自己.名字)
+\`\`\`
+
+上面的代码会渲染一个表格。
+`;
+
 const editor = monaco.editor.create(editorContainer, {
-  value: EXAMPLES[0]!.code,
+  value: DEFAULT_CODE,
   language: ZLANG_ID,
-  theme: "zlang-dark",
+  theme: "zlang-light",
   fontSize: 14,
   lineHeight: 1.6,
   fontFamily:
@@ -53,47 +66,21 @@ const editor = monaco.editor.create(editorContainer, {
   },
 });
 
-for (const ex of EXAMPLES) {
-  const opt = document.createElement("option");
-  opt.value = ex.name;
-  opt.textContent = ex.name;
-  select.appendChild(opt);
-}
-
-select.addEventListener("change", () => {
-  const found = EXAMPLES.find((e) => e.name === select.value);
-  if (found) {
-    editor.setValue(found.code);
-    execute();
-  }
-});
-
 function execute() {
   const source = editor.getValue();
-  const startTime = performance.now();
 
   try {
     const { segments, errors } = run(source);
-    const elapsed = (performance.now() - startTime).toFixed(1);
-
-    if (errors.length === 0) {
-      status.textContent = `✓ ${elapsed}ms`;
-      status.className = "status ok";
-    } else {
-      status.textContent = `✗ ${errors.length} error(s)`;
-      status.className = "status err";
-    }
-
-    output.innerHTML = renderSegments(segments, errors);
+    renderEngine.renderSegments(segments, errors, output);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    status.textContent = "✗ Fatal error";
-    status.className = "status err";
-    output.innerHTML = `<div class="error-item">${escapeHtml(message)}</div>`;
+    output.innerHTML = "";
+    const errDiv = document.createElement("div");
+    errDiv.className = "render-error-item";
+    errDiv.textContent = message;
+    output.appendChild(errDiv);
   }
 }
-
-runBtn.addEventListener("click", execute);
 
 editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
   execute();
@@ -130,11 +117,3 @@ document.addEventListener("mouseup", () => {
 });
 
 execute();
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
