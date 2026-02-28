@@ -20,25 +20,28 @@ import type {
   ArrayExpression,
   ObjectExpression,
   ArrowFunctionExpression,
-  NamedArgument,
 } from "@z-lang/types";
 import { Environment } from "./environment.js";
-import {
-  type ZValue,
-  type ZObject,
-  type ZTable,
-  type TableColumn,
-  type ScopeResult,
-  ReturnSignal,
-  BreakSignal,
-  ContinueSignal,
-  isZObject,
-  isCallable,
-} from "./values.js";
+import { ZValue } from "./values/base.js";
+import { ZNumber, ZString, ZBoolean, ZNull } from "./values/primitives.js";
+import { ZArray, ZObject } from "./values/collections.js";
+import { ZFunction, ZArrowFunction, isCallable } from "./values/callables.js";
+import { ReturnSignal, BreakSignal, ContinueSignal } from "./signals.js";
+import type { ScopeResult } from "./segments.js";
+import { BuiltinRegistry } from "./builtins/registry.js";
+import type { Evaluator } from "./builtins/registry.js";
+import { RtableBuiltin } from "./builtins/rtable.js";
 
 const MAX_LOOP_ITERATIONS = 100_000;
 
-export class Interpreter {
+export class Interpreter implements Evaluator {
+  private readonly builtins: BuiltinRegistry;
+
+  constructor() {
+    this.builtins = new BuiltinRegistry();
+    this.builtins.register("rtable", new RtableBuiltin());
+  }
+
   executeProgram(program: Program): ScopeResult[] {
     const results: ScopeResult[] = [];
     for (let i = 0; i < program.body.length; i++) {
@@ -47,7 +50,7 @@ export class Interpreter {
         results.push({ index: i, value });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        results.push({ index: i, value: null, error: message });
+        results.push({ index: i, value: ZNull.instance, error: message });
       }
     }
     return results;
@@ -55,7 +58,7 @@ export class Interpreter {
 
   private executeScopeBlock(scope: ScopeBlock): ZValue {
     const env = new Environment();
-    let lastValue: ZValue = null;
+    let lastValue: ZValue = ZNull.instance;
     for (const stmt of scope.body) {
       lastValue = this.executeStatement(stmt, env);
     }
@@ -100,13 +103,12 @@ export class Interpreter {
     stmt: FunctionDeclaration,
     env: Environment,
   ): ZValue {
-    const fn = {
-      __kind: "function" as const,
-      name: stmt.name,
-      params: stmt.params.map((p) => p.name),
-      body: stmt.body,
-      closure: env,
-    };
+    const fn = new ZFunction(
+      stmt.name,
+      stmt.params.map((p) => p.name),
+      stmt.body,
+      env,
+    );
     env.define(stmt.name, fn);
     return fn;
   }
@@ -120,7 +122,7 @@ export class Interpreter {
 
   private executeIfStatement(stmt: IfStatement, env: Environment): ZValue {
     const test = this.evaluate(stmt.test, env);
-    if (this.isTruthy(test)) {
+    if (test.isTruthy()) {
       return this.executeBlock(stmt.consequent, env);
     }
     if (stmt.alternate) {
@@ -129,16 +131,16 @@ export class Interpreter {
       }
       return this.executeBlock(stmt.alternate, env);
     }
-    return null;
+    return ZNull.instance;
   }
 
   private executeWhileStatement(
     stmt: WhileStatement,
     env: Environment,
   ): ZValue {
-    let lastValue: ZValue = null;
+    let lastValue: ZValue = ZNull.instance;
     let iterations = 0;
-    while (this.isTruthy(this.evaluate(stmt.test, env))) {
+    while (this.evaluate(stmt.test, env).isTruthy()) {
       if (++iterations > MAX_LOOP_ITERATIONS) {
         throw new Error("Maximum loop iterations exceeded");
       }
@@ -156,9 +158,9 @@ export class Interpreter {
   private executeForStatement(stmt: ForStatement, env: Environment): ZValue {
     const forEnv = new Environment(env);
     this.evaluate(stmt.init, forEnv);
-    let lastValue: ZValue = null;
+    let lastValue: ZValue = ZNull.instance;
     let iterations = 0;
-    while (this.isTruthy(this.evaluate(stmt.test, forEnv))) {
+    while (this.evaluate(stmt.test, forEnv).isTruthy()) {
       if (++iterations > MAX_LOOP_ITERATIONS) {
         throw new Error("Maximum loop iterations exceeded");
       }
@@ -181,7 +183,9 @@ export class Interpreter {
     stmt: ReturnStatement,
     env: Environment,
   ): never {
-    const value = stmt.argument ? this.evaluate(stmt.argument, env) : null;
+    const value = stmt.argument
+      ? this.evaluate(stmt.argument, env)
+      : ZNull.instance;
     throw new ReturnSignal(value);
   }
 
@@ -191,27 +195,27 @@ export class Interpreter {
   }
 
   private executeBlockInEnv(block: BlockStatement, env: Environment): ZValue {
-    let lastValue: ZValue = null;
+    let lastValue: ZValue = ZNull.instance;
     for (const stmt of block.body) {
       lastValue = this.executeStatement(stmt, env);
     }
     return lastValue;
   }
 
-  // ---------------------------------------------------------------------------
-  // Expression evaluation
-  // ---------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // Expression evaluation (implements Evaluator interface)
+  // -------------------------------------------------------------------------
 
   evaluate(expr: Expression, env: Environment): ZValue {
     switch (expr.type) {
       case "NumberLiteral":
-        return expr.value;
+        return new ZNumber(expr.value);
       case "StringLiteral":
-        return expr.value;
+        return new ZString(expr.value);
       case "BooleanLiteral":
-        return expr.value;
+        return new ZBoolean(expr.value);
       case "NullLiteral":
-        return null;
+        return ZNull.instance;
       case "Identifier":
         return env.get(expr.name);
       case "BinaryExpression":
@@ -241,37 +245,39 @@ export class Interpreter {
 
     switch (expr.operator) {
       case "+":
-        if (typeof left === "string" || typeof right === "string") {
-          return String(left ?? "null") + String(right ?? "null");
+        if (left instanceof ZString || right instanceof ZString) {
+          const l = left instanceof ZNull ? "null" : String(left.unbox());
+          const r = right instanceof ZNull ? "null" : String(right.unbox());
+          return new ZString(l + r);
         }
-        return this.toNumber(left) + this.toNumber(right);
+        return new ZNumber(left.toNumber() + right.toNumber());
       case "-":
-        return this.toNumber(left) - this.toNumber(right);
+        return new ZNumber(left.toNumber() - right.toNumber());
       case "*":
-        return this.toNumber(left) * this.toNumber(right);
+        return new ZNumber(left.toNumber() * right.toNumber());
       case "/": {
-        const r = this.toNumber(right);
+        const r = right.toNumber();
         if (r === 0) throw new Error("Division by zero");
-        return this.toNumber(left) / r;
+        return new ZNumber(left.toNumber() / r);
       }
       case "%":
-        return this.toNumber(left) % this.toNumber(right);
+        return new ZNumber(left.toNumber() % right.toNumber());
       case "==":
-        return left === right;
+        return new ZBoolean(this.isEqual(left, right));
       case "!=":
-        return left !== right;
+        return new ZBoolean(!this.isEqual(left, right));
       case "<":
-        return this.toNumber(left) < this.toNumber(right);
+        return new ZBoolean(left.toNumber() < right.toNumber());
       case ">":
-        return this.toNumber(left) > this.toNumber(right);
+        return new ZBoolean(left.toNumber() > right.toNumber());
       case "<=":
-        return this.toNumber(left) <= this.toNumber(right);
+        return new ZBoolean(left.toNumber() <= right.toNumber());
       case ">=":
-        return this.toNumber(left) >= this.toNumber(right);
+        return new ZBoolean(left.toNumber() >= right.toNumber());
       case "&&":
-        return this.isTruthy(left) ? right : left;
+        return left.isTruthy() ? right : left;
       case "||":
-        return this.isTruthy(left) ? left : right;
+        return left.isTruthy() ? left : right;
     }
   }
 
@@ -279,9 +285,9 @@ export class Interpreter {
     const arg = this.evaluate(expr.argument, env);
     switch (expr.operator) {
       case "-":
-        return -this.toNumber(arg);
+        return new ZNumber(-arg.toNumber());
       case "!":
-        return !this.isTruthy(arg);
+        return new ZBoolean(!arg.isTruthy());
     }
   }
 
@@ -303,16 +309,13 @@ export class Interpreter {
           return value;
         case "+=": {
           const cur = env.get(name);
-          const result =
-            typeof cur === "string" || typeof value === "string"
-              ? String(cur ?? "null") + String(value ?? "null")
-              : this.toNumber(cur) + this.toNumber(value);
+          const result = this.applyAdd(cur, value);
           env.set(name, result);
           return result;
         }
         case "-=": {
           const cur = env.get(name);
-          const result = this.toNumber(cur) - this.toNumber(value);
+          const result = new ZNumber(cur.toNumber() - value.toNumber());
           env.set(name, result);
           return result;
         }
@@ -321,9 +324,12 @@ export class Interpreter {
 
     if (expr.target.type === "MemberExpression") {
       const obj = this.evaluate(expr.target.object, env);
-      if (isZObject(obj)) {
-        const resolved = expr.operator === "=" ? value : this.applyCompoundOp(obj.entries[expr.target.property], value, expr.operator);
-        obj.entries[expr.target.property] = resolved;
+      if (obj instanceof ZObject) {
+        const resolved =
+          expr.operator === "="
+            ? value
+            : this.applyCompoundOp(obj.get(expr.target.property), value, expr.operator);
+        obj.set(expr.target.property, resolved);
         return resolved;
       }
       throw new Error("Cannot set property on non-object");
@@ -332,14 +338,20 @@ export class Interpreter {
     if (expr.target.type === "IndexExpression") {
       const obj = this.evaluate(expr.target.object, env);
       const idx = this.evaluate(expr.target.index, env);
-      if (Array.isArray(obj) && typeof idx === "number") {
-        const resolved = expr.operator === "=" ? value : this.applyCompoundOp(obj[idx], value, expr.operator);
-        obj[idx] = resolved;
+      if (obj instanceof ZArray && idx instanceof ZNumber) {
+        const resolved =
+          expr.operator === "="
+            ? value
+            : this.applyCompoundOp(obj.get(idx.value), value, expr.operator);
+        obj.set(idx.value, resolved);
         return resolved;
       }
-      if (isZObject(obj) && typeof idx === "string") {
-        const resolved = expr.operator === "=" ? value : this.applyCompoundOp(obj.entries[idx], value, expr.operator);
-        obj.entries[idx] = resolved;
+      if (obj instanceof ZObject && idx instanceof ZString) {
+        const resolved =
+          expr.operator === "="
+            ? value
+            : this.applyCompoundOp(obj.get(idx.value), value, expr.operator);
+        obj.set(idx.value, resolved);
         return resolved;
       }
       throw new Error("Invalid index assignment target");
@@ -348,27 +360,27 @@ export class Interpreter {
     throw new Error("Invalid assignment target");
   }
 
-  private applyCompoundOp(
-    cur: ZValue | undefined,
-    value: ZValue,
-    op: string,
-  ): ZValue {
-    const current = cur ?? null;
-    if (op === "+=") {
-      if (typeof current === "string" || typeof value === "string") {
-        return String(current ?? "null") + String(value ?? "null");
-      }
-      return this.toNumber(current) + this.toNumber(value);
-    }
-    if (op === "-=") {
-      return this.toNumber(current) - this.toNumber(value);
-    }
+  private applyCompoundOp(cur: ZValue, value: ZValue, op: string): ZValue {
+    if (op === "+=") return this.applyAdd(cur, value);
+    if (op === "-=") return new ZNumber(cur.toNumber() - value.toNumber());
     return value;
   }
 
+  private applyAdd(left: ZValue, right: ZValue): ZValue {
+    if (left instanceof ZString || right instanceof ZString) {
+      const l = left instanceof ZNull ? "null" : String(left.unbox());
+      const r = right instanceof ZNull ? "null" : String(right.unbox());
+      return new ZString(l + r);
+    }
+    return new ZNumber(left.toNumber() + right.toNumber());
+  }
+
   private evaluateCall(expr: CallExpression, env: Environment): ZValue {
-    if (expr.callee.type === "Identifier" && expr.callee.name === "rtable") {
-      return this.evaluateRtable(expr, env);
+    if (expr.callee.type === "Identifier") {
+      const builtin = this.builtins.get(expr.callee.name);
+      if (builtin) {
+        return builtin.execute(expr.arguments, env, this);
+      }
     }
 
     const callee = this.evaluate(expr.callee, env);
@@ -382,18 +394,19 @@ export class Interpreter {
     });
     const callEnv = new Environment(callee.closure);
     for (let i = 0; i < callee.params.length; i++) {
-      callEnv.define(callee.params[i]!, args[i] ?? null);
+      callEnv.define(callee.params[i]!, args[i] ?? ZNull.instance);
     }
 
-    if (callee.__kind === "arrow" && callee.body.type !== "BlockStatement") {
+    if (callee instanceof ZArrowFunction && callee.body.type !== "BlockStatement") {
       return this.evaluate(callee.body as Expression, callEnv);
     }
 
     try {
-      const body = callee.__kind === "arrow"
-        ? (callee.body as BlockStatement)
-        : callee.body;
-      let lastValue: ZValue = null;
+      const body =
+        callee instanceof ZArrowFunction
+          ? (callee.body as BlockStatement)
+          : callee.body;
+      let lastValue: ZValue = ZNull.instance;
       for (const stmt of body.body) {
         lastValue = this.executeStatement(stmt, callEnv);
       }
@@ -404,76 +417,31 @@ export class Interpreter {
     }
   }
 
-  private evaluateRtable(expr: CallExpression, env: Environment): ZValue {
-    const allArgs = expr.arguments;
-    if (allArgs.length < 1) {
-      throw new Error("rtable requires at least 1 argument (data source)");
-    }
-
-    const firstArg = allArgs[0]!;
-    if (firstArg.type === "NamedArgument") {
-      throw new Error("rtable first argument must be a data source, not a named argument");
-    }
-
-    const recordsVal = this.evaluate(firstArg, env);
-    if (!Array.isArray(recordsVal)) {
-      throw new Error("rtable first argument must be an array");
-    }
-
-    const namedArgs: NamedArgument[] = [];
-    for (let i = 1; i < allArgs.length; i++) {
-      const arg = allArgs[i]!;
-      if (arg.type !== "NamedArgument") {
-        throw new Error("rtable column definitions must be named arguments (name = expression)");
-      }
-      namedArgs.push(arg);
-    }
-
-    const columns: TableColumn[] = namedArgs.map((na) => {
-      const values: ZValue[] = recordsVal.map((record) => {
-        const recordEnv = new Environment(env);
-
-        if (isZObject(record)) {
-          for (const [key, val] of Object.entries(record.entries)) {
-            recordEnv.define(key, val);
-          }
-          recordEnv.define("自己", record);
-        }
-
-        return this.evaluate(na.value, recordEnv);
-      });
-
-      return { name: na.name, values };
-    });
-
-    return { __kind: "table", columns } as ZTable;
-  }
-
   private evaluateMember(expr: MemberExpression, env: Environment): ZValue {
     const obj = this.evaluate(expr.object, env);
-    if (isZObject(obj)) {
-      return obj.entries[expr.property] ?? null;
+    if (obj instanceof ZObject) {
+      return obj.get(expr.property);
     }
-    if (Array.isArray(obj) && expr.property === "length") {
-      return obj.length;
+    if (obj instanceof ZArray && expr.property === "length") {
+      return new ZNumber(obj.length);
     }
-    return null;
+    return ZNull.instance;
   }
 
   private evaluateIndex(expr: IndexExpression, env: Environment): ZValue {
     const obj = this.evaluate(expr.object, env);
     const idx = this.evaluate(expr.index, env);
-    if (Array.isArray(obj) && typeof idx === "number") {
-      return obj[idx] ?? null;
+    if (obj instanceof ZArray && idx instanceof ZNumber) {
+      return obj.get(idx.value);
     }
-    if (isZObject(obj) && typeof idx === "string") {
-      return obj.entries[idx] ?? null;
+    if (obj instanceof ZObject && idx instanceof ZString) {
+      return obj.get(idx.value);
     }
-    return null;
+    return ZNull.instance;
   }
 
   private evaluateArray(expr: ArrayExpression, env: Environment): ZValue {
-    return expr.elements.map((el) => this.evaluate(el, env));
+    return new ZArray(expr.elements.map((el) => this.evaluate(el, env)));
   }
 
   private evaluateObject(expr: ObjectExpression, env: Environment): ZValue {
@@ -481,40 +449,27 @@ export class Interpreter {
     for (const prop of expr.properties) {
       entries[prop.key] = this.evaluate(prop.value, env);
     }
-    return { __kind: "object", entries } as ZObject;
+    return new ZObject(entries);
   }
 
   private evaluateArrowFunction(
     expr: ArrowFunctionExpression,
     env: Environment,
   ): ZValue {
-    return {
-      __kind: "arrow" as const,
-      params: expr.params.map((p) => p.name),
-      body: expr.body,
-      closure: env,
-    };
+    return new ZArrowFunction(
+      expr.params.map((p) => p.name),
+      expr.body,
+      env,
+    );
   }
 
-  // ---------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
   // Helpers
-  // ---------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
 
-  private isTruthy(v: ZValue): boolean {
-    if (v === null) return false;
-    if (v === false) return false;
-    if (v === 0) return false;
-    if (v === "") return false;
-    return true;
-  }
-
-  private toNumber(v: ZValue): number {
-    if (typeof v === "number") return v;
-    if (typeof v === "boolean") return v ? 1 : 0;
-    if (typeof v === "string") {
-      const n = Number(v);
-      return isNaN(n) ? 0 : n;
-    }
-    return 0;
+  private isEqual(a: ZValue, b: ZValue): boolean {
+    if (a instanceof ZNull && b instanceof ZNull) return true;
+    if (a.kind !== b.kind) return false;
+    return a.unbox() === b.unbox();
   }
 }

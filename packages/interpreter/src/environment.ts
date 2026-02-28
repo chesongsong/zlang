@@ -1,4 +1,4 @@
-import type { ZValue } from "./values.js";
+import type { ZValue } from "./values/base.js";
 
 export class Environment {
   private values = new Map<string, ZValue>();

@@ -6,15 +6,45 @@ export type { ParseOptions, ParseOutput, RunOutput } from "./zlang.js";
 export { ASTBuilder, ScopeResolver } from "@z-lang/ast";
 export { type ASTVisitor, visitNode } from "@z-lang/ast";
 
-// Interpreter
-export { Interpreter, execute, formatValue, isZTable } from "@z-lang/interpreter";
-export type { ZValue, ZObject, ZFunction, ZArrowFunction, ZTable, TableColumn, ScopeResult, OutputSegment, MarkdownSegment, ScopeSegment } from "@z-lang/interpreter";
+// Value domain (OOP class hierarchy)
+export {
+  ZValue,
+  ZNumber,
+  ZString,
+  ZBoolean,
+  ZNull,
+  ZArray,
+  ZObject,
+  ZFunction,
+  ZArrowFunction,
+  ZTable,
+  isCallable,
+  box,
+} from "@z-lang/interpreter";
+export type {
+  ZCallable,
+  TableColumn,
+  RenderTable,
+  RenderColumn,
+} from "@z-lang/interpreter";
 
-// Box/Unbox boundary — JS <-> z-lang value conversion
-export { box, unbox, unboxTable, format } from "@z-lang/interpreter";
-export type { RenderTable, RenderColumn } from "@z-lang/interpreter";
+// Interpreter & execution
+export { Interpreter, execute } from "@z-lang/interpreter";
+export type {
+  ScopeResult,
+  OutputSegment,
+  MarkdownSegment,
+  ScopeSegment,
+} from "@z-lang/interpreter";
 
-// All types
+// Builtins
+export { BuiltinRegistry } from "@z-lang/interpreter";
+export type { BuiltinFunction, Evaluator } from "@z-lang/interpreter";
+
+// Environment
+export { Environment } from "@z-lang/interpreter";
+
+// All AST types
 export type {
   Position,
   SourceLocation,
