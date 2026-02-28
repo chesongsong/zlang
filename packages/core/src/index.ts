@@ -6,7 +6,7 @@ export type { ParseOptions, ParseOutput, RunOutput } from "./zlang.js";
 export { ASTBuilder, ScopeResolver } from "@z-lang/ast";
 export { type ASTVisitor, visitNode } from "@z-lang/ast";
 
-// Value domain (OOP class hierarchy)
+// Value domain — basic types
 export {
   ZValue,
   ZNumber,
@@ -20,6 +20,14 @@ export {
   box,
 } from "@z-lang/interpreter";
 
+// Renderables — UI-renderable value types
+export { ZRenderable, ZRenderTable } from "@z-lang/interpreter";
+export type {
+  TableColumn,
+  RenderTableData,
+  RenderTableColumn,
+} from "@z-lang/interpreter";
+
 // Interpreter & execution
 export { Interpreter, execute } from "@z-lang/interpreter";
 export type {
@@ -30,7 +38,7 @@ export type {
 } from "@z-lang/interpreter";
 
 // Builtins
-export { BuiltinRegistry } from "@z-lang/interpreter";
+export { BuiltinRegistry, RtableBuiltin } from "@z-lang/interpreter";
 export type { BuiltinFunction, Evaluator } from "@z-lang/interpreter";
 
 // Environment

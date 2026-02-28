@@ -31,15 +31,11 @@ const DEFAULT_CODE = `# z-lang Playground
 问候
 \`\`\`
 
-支持基础运算和函数定义：
+支持函数定义和 rtable 渲染表格：
 
 \`\`\`
-加法(a, b) {
-  return a + b
-}
-
-结果 = 加法(10, 20)
-结果
+records = [{ 姓名: "Alice", 年龄: 25 }, { 姓名: "Bob", 年龄: 30 }, { 姓名: "Charlie", 年龄: 28 }]
+rtable(records, 姓名 = 自己.姓名, 年龄 = 自己.年龄)
 \`\`\`
 `;
 

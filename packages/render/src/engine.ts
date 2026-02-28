@@ -1,5 +1,5 @@
 import type { OutputSegment } from "@z-lang/interpreter";
-import { ZValue } from "@z-lang/interpreter";
+import { ZValue, ZRenderable } from "@z-lang/interpreter";
 import type { ComponentFactory, Disposable } from "./types.js";
 
 export class RenderEngine {
@@ -65,7 +65,21 @@ export class RenderEngine {
       return;
     }
 
-    const formatted = result.value.toString();
+    const value = result.value;
+
+    if (value instanceof ZRenderable) {
+      const renderer = this.factory.createRenderer(value.kind);
+      if (renderer) {
+        const wrapper = document.createElement("div");
+        wrapper.className = `render-segment render-${value.kind}`;
+        container.appendChild(wrapper);
+        const disposable = renderer.render(value.renderData, wrapper);
+        this.disposables.push(disposable);
+        return;
+      }
+    }
+
+    const formatted = value.toString();
     const wrapper = document.createElement("div");
     wrapper.className = "render-segment render-scope";
     container.appendChild(wrapper);

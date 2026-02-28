@@ -34,6 +34,7 @@ import { ReturnSignal, BreakSignal, ContinueSignal } from "./signals.js";
 import type { ScopeResult } from "./segments.js";
 import { BuiltinRegistry } from "./builtins/registry.js";
 import type { Evaluator } from "./builtins/registry.js";
+import { RtableBuiltin } from "./builtins/rtable.js";
 
 const MAX_LOOP_ITERATIONS = 100_000;
 
@@ -42,6 +43,7 @@ export class Interpreter implements Evaluator {
 
   constructor() {
     this.builtins = new BuiltinRegistry();
+    this.builtins.register("rtable", new RtableBuiltin());
   }
 
   executeProgram(program: Program): ScopeResult[] {

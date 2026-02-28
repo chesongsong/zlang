@@ -1,4 +1,4 @@
-// Value domain
+// Value domain — basic types
 export { ZValue } from "./values/base.js";
 export { ZNumber } from "./values/number.js";
 export { ZString } from "./values/string.js";
@@ -9,6 +9,15 @@ export { ZObject } from "./values/object.js";
 export { ZFunction } from "./values/function.js";
 export { ZDate } from "./values/date.js";
 export { box } from "./values/index.js";
+
+// Renderables — UI-renderable value types
+export { ZRenderable } from "./renderables/base.js";
+export { ZRenderTable } from "./renderables/table.js";
+export type {
+  TableColumn,
+  RenderTableData,
+  RenderTableColumn,
+} from "./renderables/table.js";
 
 // Signals
 export { ReturnSignal, BreakSignal, ContinueSignal } from "./signals.js";
@@ -27,6 +36,7 @@ export { Environment } from "./environment.js";
 // Builtins
 export { BuiltinRegistry } from "./builtins/registry.js";
 export type { BuiltinFunction, Evaluator } from "./builtins/registry.js";
+export { RtableBuiltin } from "./builtins/rtable.js";
 
 // Interpreter
 export { Interpreter } from "./interpreter.js";
