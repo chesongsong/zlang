@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>z-lang Playground</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+</head>
+<body>
+  <div id="app">
+    <header id="header">
+      <div class="header-left">
+        <h1>z-lang <span class="accent">Playground</span></h1>
+      </div>
+      <div class="header-right">
+        <label for="example-select">示例：</label>
+        <select id="example-select"></select>
+        <button id="run-btn">Run</button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="editor-panel">
+        <div class="panel-header">
+          <span class="panel-title">Editor</span>
+          <span id="status" class="status"></span>
+        </div>
+        <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+      </section>
+
+      <div id="divider"></div>
+
+      <section id="output-panel">
+        <div class="panel-header">
+          <nav id="tabs">
+            <button class="tab active" data-tab="ast">AST</button>
+            <button class="tab" data-tab="tokens">Tokens</button>
+            <button class="tab" data-tab="errors">Errors</button>
+          </nav>
+        </div>
+        <div id="output-content">
+          <div id="tab-ast" class="tab-pane active"></div>
+          <div id="tab-tokens" class="tab-pane"></div>
+          <div id="tab-errors" class="tab-pane"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

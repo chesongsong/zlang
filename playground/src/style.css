@@ -1,0 +1,380 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0d1117;
+  --bg-panel: #161b22;
+  --bg-input: #0d1117;
+  --bg-hover: #1c2333;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-muted: #7d8590;
+  --accent: #58a6ff;
+  --accent-hover: #79c0ff;
+  --green: #3fb950;
+  --red: #f85149;
+  --orange: #d29922;
+  --purple: #bc8cff;
+  --cyan: #39d2c0;
+  --radius: 8px;
+  --font-mono: "SF Mono", "Cascadia Code", "Fira Code", "JetBrains Mono", Consolas, monospace;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Header */
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.accent { color: var(--accent); }
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-right label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+#example-select {
+  background: var(--bg-input);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+}
+
+#example-select:focus {
+  border-color: var(--accent);
+}
+
+#run-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#run-btn:hover {
+  background: var(--accent-hover);
+}
+
+#run-btn:active {
+  transform: scale(0.97);
+}
+
+/* Main layout */
+#main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Editor panel */
+#editor-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+}
+
+.status {
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.status.ok { color: var(--green); }
+.status.err { color: var(--red); }
+
+#editor {
+  flex: 1;
+  resize: none;
+  background: var(--bg-input);
+  color: var(--text);
+  border: none;
+  padding: 16px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  tab-size: 2;
+  outline: none;
+  overflow: auto;
+}
+
+#editor::placeholder {
+  color: var(--text-muted);
+}
+
+/* Divider */
+#divider {
+  width: 1px;
+  background: var(--border);
+  cursor: col-resize;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+#divider:hover,
+#divider.dragging {
+  background: var(--accent);
+  width: 3px;
+}
+
+/* Output panel */
+#output-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+#tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.tab {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.tab:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+.tab.active {
+  color: var(--accent);
+  background: rgba(88, 166, 255, 0.1);
+}
+
+#output-content {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+}
+
+.tab-pane {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+/* AST Tree */
+.ast-node {
+  margin-left: 16px;
+  position: relative;
+}
+
+.ast-node::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+
+.ast-type {
+  color: var(--purple);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ast-type:hover {
+  color: var(--accent-hover);
+}
+
+.ast-type::before {
+  content: "▸ ";
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.ast-type.expanded::before {
+  content: "▾ ";
+}
+
+.ast-key {
+  color: var(--cyan);
+}
+
+.ast-string {
+  color: var(--green);
+}
+
+.ast-number {
+  color: var(--orange);
+}
+
+.ast-boolean {
+  color: var(--orange);
+}
+
+.ast-null {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.ast-prop {
+  padding: 1px 0;
+}
+
+.ast-children {
+  display: none;
+}
+
+.ast-children.expanded {
+  display: block;
+}
+
+/* Tokens table */
+.token-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.token-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg-panel);
+}
+
+.token-table td {
+  padding: 4px 12px;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.4);
+  font-size: 13px;
+}
+
+.token-table tr:hover td {
+  background: var(--bg-hover);
+}
+
+.token-type-badge {
+  display: inline-block;
+  background: rgba(188, 140, 255, 0.15);
+  color: var(--purple);
+  padding: 1px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.token-text {
+  color: var(--green);
+}
+
+.token-pos {
+  color: var(--text-muted);
+}
+
+/* Errors */
+.error-item {
+  background: rgba(248, 81, 73, 0.08);
+  border: 1px solid rgba(248, 81, 73, 0.25);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  color: var(--red);
+}
+
+.error-empty {
+  color: var(--green);
+  font-size: 14px;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #main {
+    flex-direction: column;
+  }
+  #divider {
+    width: 100%;
+    height: 1px;
+    cursor: row-resize;
+  }
+}

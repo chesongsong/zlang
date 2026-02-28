@@ -7,7 +7,8 @@
     "packages/types",
     "packages/parser",
     "packages/ast",
-    "packages/core"
+    "packages/core",
+    "playground"
   ],
   "scripts": {
     "generate:lexer": "antlr-ng -Dlanguage=TypeScript -v -o packages/parser/src/generated --exact-output-dir -- packages/parser/grammar/ZLangLexer.g4",
@@ -16,6 +17,7 @@
     "build:ts": "tsc --build tsconfig.json",
     "build:bundle": "node scripts/build.mjs",
     "build": "npm run generate && npm run build:ts && npm run build:bundle",
+    "dev": "npm run build && npm -w playground run dev",
     "clean": "rm -rf packages/*/dist packages/*/*.tsbuildinfo packages/parser/src/generated/*.ts packages/parser/src/generated/*.interp packages/parser/src/generated/*.tokens"
   },
   "devDependencies": {
