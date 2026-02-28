@@ -3,11 +3,15 @@ parser grammar ZLangParser;
 options { tokenVocab = ZLangLexer; }
 
 // =========================================================================
-// Program
+// Program — one or more scope blocks
 // =========================================================================
 
 program
-    : statement* EOF
+    : scopeBlock* EOF
+    ;
+
+scopeBlock
+    : FENCE statement* FENCE
     ;
 
 // =========================================================================
@@ -15,8 +19,7 @@ program
 // =========================================================================
 
 statement
-    : variableDeclaration
-    | functionDeclaration
+    : functionDeclaration
     | ifStatement
     | whileStatement
     | forStatement
@@ -25,10 +28,6 @@ statement
     | continueStatement
     | expressionStatement
     | block
-    ;
-
-variableDeclaration
-    : (LET | CONST) IDENTIFIER (COLON typeAnnotation)? ASSIGN expression SEMI
     ;
 
 functionDeclaration
@@ -64,12 +63,7 @@ whileStatement
     ;
 
 forStatement
-    : FOR LPAREN forInit SEMI expression SEMI expression RPAREN block
-    ;
-
-forInit
-    : (LET | CONST) IDENTIFIER (COLON typeAnnotation)? ASSIGN expression
-    | expression
+    : FOR LPAREN expression SEMI expression SEMI expression RPAREN block
     ;
 
 returnStatement

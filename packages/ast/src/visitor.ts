@@ -1,5 +1,6 @@
 import type {
   Program,
+  ScopeBlock,
   VariableDeclaration,
   FunctionDeclaration,
   IfStatement,
@@ -26,6 +27,7 @@ import type {
 
 export interface ASTVisitor<R = void> {
   visitProgram(node: Program): R;
+  visitScopeBlock(node: ScopeBlock): R;
 
   visitVariableDeclaration(node: VariableDeclaration): R;
   visitFunctionDeclaration(node: FunctionDeclaration): R;
@@ -59,6 +61,8 @@ export function visitNode<R>(
   switch (node.type) {
     case "Program":
       return visitor.visitProgram(node as Program);
+    case "ScopeBlock":
+      return visitor.visitScopeBlock(node as ScopeBlock);
     case "VariableDeclaration":
       return visitor.visitVariableDeclaration(node as VariableDeclaration);
     case "FunctionDeclaration":

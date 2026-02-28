@@ -2,9 +2,9 @@ import { ParserRuleContext, type Token } from "antlr4ng";
 import { ZLangParser } from "@z-lang/parser";
 import type {
   Program,
+  ScopeBlock,
   Statement,
   Expression,
-  VariableDeclaration,
   FunctionDeclaration,
   IfStatement,
   WhileStatement,
@@ -64,6 +64,23 @@ function tokenLoc(token: Token): SourceLocation {
 
 export class ASTBuilder {
   buildProgram(ctx: ParserRuleContext): Program {
+    const scopes: ScopeBlock[] = [];
+    for (const child of ctx.children ?? []) {
+      if (
+        child instanceof ParserRuleContext &&
+        child.ruleIndex === ZLangParser.RULE_scopeBlock
+      ) {
+        scopes.push(this.buildScopeBlock(child));
+      }
+    }
+    return {
+      type: "Program",
+      body: scopes,
+      loc: loc(ctx),
+    };
+  }
+
+  private buildScopeBlock(ctx: ParserRuleContext): ScopeBlock {
     const stmts: Statement[] = [];
     for (const child of ctx.children ?? []) {
       if (child instanceof ParserRuleContext) {
@@ -72,7 +89,7 @@ export class ASTBuilder {
       }
     }
     return {
-      type: "Program",
+      type: "ScopeBlock",
       body: stmts,
       loc: loc(ctx),
     };
@@ -81,9 +98,6 @@ export class ASTBuilder {
   private buildStatement(ctx: ParserRuleContext): Statement | null {
     const ruleIndex = ctx.ruleIndex;
 
-    if (ruleIndex === ZLangParser.RULE_variableDeclaration) {
-      return this.buildVariableDeclaration(ctx);
-    }
     if (ruleIndex === ZLangParser.RULE_functionDeclaration) {
       return this.buildFunctionDeclaration(ctx);
     }
@@ -127,28 +141,6 @@ export class ASTBuilder {
     }
 
     return null;
-  }
-
-  private buildVariableDeclaration(ctx: ParserRuleContext): VariableDeclaration {
-    const kindToken = ctx.getToken(ZLangParser.LET, 0)
-      ?? ctx.getToken(ZLangParser.CONST, 0);
-    const kind: "let" | "const" = kindToken?.getText() === "const" ? "const" : "let";
-    const nameToken = ctx.getToken(ZLangParser.IDENTIFIER, 0);
-    const name = nameToken?.getText() ?? "";
-
-    const typeAnno = this.findRuleChild(ctx, ZLangParser.RULE_typeAnnotation);
-    const exprCtx = this.findRuleChild(ctx, ZLangParser.RULE_expression);
-
-    return {
-      type: "VariableDeclaration",
-      kind,
-      name,
-      typeAnnotation: typeAnno ? this.buildTypeAnnotation(typeAnno) : undefined,
-      init: exprCtx
-        ? this.buildExpression(exprCtx)
-        : { type: "NullLiteral", loc: loc(ctx) },
-      loc: loc(ctx),
-    };
   }
 
   private buildFunctionDeclaration(ctx: ParserRuleContext): FunctionDeclaration {
@@ -205,46 +197,19 @@ export class ASTBuilder {
   }
 
   private buildForStatement(ctx: ParserRuleContext): ForStatement {
-    const forInitCtx = this.findRuleChild(ctx, ZLangParser.RULE_forInit);
     const expressions = this.findAllRuleChildren(ctx, ZLangParser.RULE_expression);
     const blockCtx = this.findRuleChild(ctx, ZLangParser.RULE_block)!;
 
-    let init: VariableDeclaration | Expression;
-    if (forInitCtx) {
-      const letToken = forInitCtx.getToken(ZLangParser.LET, 0)
-        ?? forInitCtx.getToken(ZLangParser.CONST, 0);
-      if (letToken) {
-        const nameToken = forInitCtx.getToken(ZLangParser.IDENTIFIER, 0);
-        const typeAnno = this.findRuleChild(forInitCtx, ZLangParser.RULE_typeAnnotation);
-        const exprCtx = this.findRuleChild(forInitCtx, ZLangParser.RULE_expression);
-        init = {
-          type: "VariableDeclaration",
-          kind: letToken.getText() === "const" ? "const" : "let",
-          name: nameToken?.getText() ?? "",
-          typeAnnotation: typeAnno ? this.buildTypeAnnotation(typeAnno) : undefined,
-          init: exprCtx
-            ? this.buildExpression(exprCtx)
-            : { type: "NullLiteral", loc: loc(forInitCtx) },
-          loc: loc(forInitCtx),
-        };
-      } else {
-        const exprCtx = this.findRuleChild(forInitCtx, ZLangParser.RULE_expression);
-        init = exprCtx
-          ? this.buildExpression(exprCtx)
-          : { type: "NullLiteral", loc: loc(forInitCtx) };
-      }
-    } else {
-      init = { type: "NullLiteral", loc: loc(ctx) };
-    }
-
     return {
       type: "ForStatement",
-      init,
-      test: expressions[0]
+      init: expressions[0]
         ? this.buildExpression(expressions[0])
-        : { type: "BooleanLiteral", value: true, loc: loc(ctx) },
-      update: expressions[1]
+        : { type: "NullLiteral", loc: loc(ctx) },
+      test: expressions[1]
         ? this.buildExpression(expressions[1])
+        : { type: "BooleanLiteral", value: true, loc: loc(ctx) },
+      update: expressions[2]
+        ? this.buildExpression(expressions[2])
         : { type: "NullLiteral", loc: loc(ctx) },
       body: this.buildBlock(blockCtx),
       loc: loc(ctx),

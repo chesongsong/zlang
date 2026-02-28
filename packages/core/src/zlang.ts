@@ -3,7 +3,7 @@ import {
   tokenize as lexTokenize,
 } from "@z-lang/parser";
 import type { TokenInfo } from "@z-lang/parser";
-import { ASTBuilder } from "@z-lang/ast";
+import { ASTBuilder, ScopeResolver } from "@z-lang/ast";
 import type { Program } from "@z-lang/types";
 import { ParseError } from "@z-lang/types";
 
@@ -27,7 +27,10 @@ export function parse(source: string, _options?: ParseOptions): ParseOutput {
   }
 
   const builder = new ASTBuilder();
-  const ast = builder.buildProgram(tree);
+  const rawAst = builder.buildProgram(tree);
+
+  const resolver = new ScopeResolver();
+  const ast = resolver.resolve(rawAst);
 
   return { ast, errors: [] };
 }

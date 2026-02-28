@@ -2,8 +2,8 @@
 export { parse, tokenize } from "./zlang.js";
 export type { ParseOptions, ParseOutput } from "./zlang.js";
 
-// AST builder & visitor
-export { ASTBuilder } from "@z-lang/ast";
+// AST builder, scope resolver & visitor
+export { ASTBuilder, ScopeResolver } from "@z-lang/ast";
 export { type ASTVisitor, visitNode } from "@z-lang/ast";
 
 // All types
@@ -20,6 +20,7 @@ export type {
   Property,
   BaseNode,
   Program,
+  ScopeBlock,
   VariableDeclaration,
   FunctionDeclaration,
   IfStatement,

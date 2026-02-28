@@ -15,11 +15,16 @@ export interface BaseNode {
 }
 
 // ---------------------------------------------------------------------------
-// Program
+// Program & Scope
 // ---------------------------------------------------------------------------
 
 export interface Program extends BaseNode {
   readonly type: "Program";
+  readonly body: readonly ScopeBlock[];
+}
+
+export interface ScopeBlock extends BaseNode {
+  readonly type: "ScopeBlock";
   readonly body: readonly Statement[];
 }
 
@@ -29,7 +34,6 @@ export interface Program extends BaseNode {
 
 export interface VariableDeclaration extends BaseNode {
   readonly type: "VariableDeclaration";
-  readonly kind: "let" | "const";
   readonly name: string;
   readonly typeAnnotation?: TypeAnnotationNode;
   readonly init: Expression;
@@ -58,7 +62,7 @@ export interface WhileStatement extends BaseNode {
 
 export interface ForStatement extends BaseNode {
   readonly type: "ForStatement";
-  readonly init: VariableDeclaration | Expression;
+  readonly init: Expression;
   readonly test: Expression;
   readonly update: Expression;
   readonly body: BlockStatement;
@@ -213,4 +217,4 @@ export type Expression =
 // Union of all AST nodes
 // ---------------------------------------------------------------------------
 
-export type Node = Program | Statement | Expression;
+export type Node = Program | ScopeBlock | Statement | Expression;

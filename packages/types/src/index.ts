@@ -14,6 +14,7 @@ export type {
 export type {
   BaseNode,
   Program,
+  ScopeBlock,
   VariableDeclaration,
   FunctionDeclaration,
   IfStatement,
