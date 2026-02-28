@@ -1,15 +1,30 @@
 export { ZValue } from "./base.js";
-export { ZNumber, ZString, ZBoolean, ZNull } from "./primitives.js";
-export { ZArray, ZObject } from "./collections.js";
-export { ZFunction, ZArrowFunction, isCallable } from "./callables.js";
-export type { ZCallable } from "./callables.js";
-export { ZTable } from "./table.js";
-export type { TableColumn, RenderTable, RenderColumn } from "./table.js";
+export { ZNumber } from "./znumber.js";
+export { ZString } from "./zstring.js";
+export { ZBoolean } from "./zboolean.js";
+export { ZNull } from "./znull.js";
+export { ZArray } from "./zarray.js";
+export { ZObject } from "./zobject.js";
+export { ZFunction } from "./zfunction.js";
+export { ZArrowFunction } from "./zarrow-function.js";
+export { ZTable } from "./ztable.js";
+export type { TableColumn, RenderTable, RenderColumn } from "./ztable.js";
 
 import { ZValue } from "./base.js";
-import { ZNumber, ZString, ZBoolean, ZNull } from "./primitives.js";
-import { ZArray } from "./collections.js";
-import { ZObject } from "./collections.js";
+import { ZNumber } from "./znumber.js";
+import { ZString } from "./zstring.js";
+import { ZBoolean } from "./zboolean.js";
+import { ZNull } from "./znull.js";
+import { ZArray } from "./zarray.js";
+import { ZObject } from "./zobject.js";
+import { ZFunction } from "./zfunction.js";
+import { ZArrowFunction } from "./zarrow-function.js";
+
+export type ZCallable = ZFunction | ZArrowFunction;
+
+export function isCallable(v: ZValue): v is ZCallable {
+  return v instanceof ZFunction || v instanceof ZArrowFunction;
+}
 
 export function box(value: unknown): ZValue {
   if (value === null || value === undefined) return ZNull.instance;

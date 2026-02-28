@@ -1,9 +1,9 @@
 import type { CallArgument, NamedArgument } from "@z-lang/types";
 import type { ZValue } from "../values/base.js";
-import { ZArray } from "../values/collections.js";
-import { ZObject } from "../values/collections.js";
-import { ZTable } from "../values/table.js";
-import type { TableColumn } from "../values/table.js";
+import { ZArray } from "../values/zarray.js";
+import { ZObject } from "../values/zobject.js";
+import { ZTable } from "../values/ztable.js";
+import type { TableColumn } from "../values/ztable.js";
 import { Environment } from "../environment.js";
 import type { BuiltinFunction, Evaluator } from "./registry.js";
 

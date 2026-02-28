@@ -1,20 +1,17 @@
 // Value domain
 export { ZValue } from "./values/base.js";
-export {
-  ZNumber,
-  ZString,
-  ZBoolean,
-  ZNull,
-} from "./values/primitives.js";
-export { ZArray, ZObject } from "./values/collections.js";
-export {
-  ZFunction,
-  ZArrowFunction,
-  isCallable,
-} from "./values/callables.js";
-export type { ZCallable } from "./values/callables.js";
-export { ZTable } from "./values/table.js";
-export type { TableColumn, RenderTable, RenderColumn } from "./values/table.js";
+export { ZNumber } from "./values/znumber.js";
+export { ZString } from "./values/zstring.js";
+export { ZBoolean } from "./values/zboolean.js";
+export { ZNull } from "./values/znull.js";
+export { ZArray } from "./values/zarray.js";
+export { ZObject } from "./values/zobject.js";
+export { ZFunction } from "./values/zfunction.js";
+export { ZArrowFunction } from "./values/zarrow-function.js";
+export { isCallable } from "./values/index.js";
+export type { ZCallable } from "./values/index.js";
+export { ZTable } from "./values/ztable.js";
+export type { TableColumn, RenderTable, RenderColumn } from "./values/ztable.js";
 export { box } from "./values/index.js";
 
 // Signals

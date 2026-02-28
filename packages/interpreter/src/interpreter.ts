@@ -23,9 +23,15 @@ import type {
 } from "@z-lang/types";
 import { Environment } from "./environment.js";
 import { ZValue } from "./values/base.js";
-import { ZNumber, ZString, ZBoolean, ZNull } from "./values/primitives.js";
-import { ZArray, ZObject } from "./values/collections.js";
-import { ZFunction, ZArrowFunction, isCallable } from "./values/callables.js";
+import { ZNumber } from "./values/znumber.js";
+import { ZString } from "./values/zstring.js";
+import { ZBoolean } from "./values/zboolean.js";
+import { ZNull } from "./values/znull.js";
+import { ZArray } from "./values/zarray.js";
+import { ZObject } from "./values/zobject.js";
+import { ZFunction } from "./values/zfunction.js";
+import { ZArrowFunction } from "./values/zarrow-function.js";
+import { isCallable } from "./values/index.js";
 import { ReturnSignal, BreakSignal, ContinueSignal } from "./signals.js";
 import type { ScopeResult } from "./segments.js";
 import { BuiltinRegistry } from "./builtins/registry.js";
