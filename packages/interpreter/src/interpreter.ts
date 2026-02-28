@@ -23,20 +23,17 @@ import type {
 } from "@z-lang/types";
 import { Environment } from "./environment.js";
 import { ZValue } from "./values/base.js";
-import { ZNumber } from "./values/znumber.js";
-import { ZString } from "./values/zstring.js";
-import { ZBoolean } from "./values/zboolean.js";
-import { ZNull } from "./values/znull.js";
-import { ZArray } from "./values/zarray.js";
-import { ZObject } from "./values/zobject.js";
-import { ZFunction } from "./values/zfunction.js";
-import { ZArrowFunction } from "./values/zarrow-function.js";
-import { isCallable } from "./values/index.js";
+import { ZNumber } from "./values/number.js";
+import { ZString } from "./values/string.js";
+import { ZBool } from "./values/bool.js";
+import { ZNull } from "./values/null.js";
+import { ZArray } from "./values/array.js";
+import { ZObject } from "./values/object.js";
+import { ZFunction } from "./values/function.js";
 import { ReturnSignal, BreakSignal, ContinueSignal } from "./signals.js";
 import type { ScopeResult } from "./segments.js";
 import { BuiltinRegistry } from "./builtins/registry.js";
 import type { Evaluator } from "./builtins/registry.js";
-import { RtableBuiltin } from "./builtins/rtable.js";
 
 const MAX_LOOP_ITERATIONS = 100_000;
 
@@ -45,7 +42,6 @@ export class Interpreter implements Evaluator {
 
   constructor() {
     this.builtins = new BuiltinRegistry();
-    this.builtins.register("rtable", new RtableBuiltin());
   }
 
   executeProgram(program: Program): ScopeResult[] {
@@ -219,7 +215,7 @@ export class Interpreter implements Evaluator {
       case "StringLiteral":
         return new ZString(expr.value);
       case "BooleanLiteral":
-        return new ZBoolean(expr.value);
+        return new ZBool(expr.value);
       case "NullLiteral":
         return ZNull.instance;
       case "Identifier":
@@ -269,17 +265,17 @@ export class Interpreter implements Evaluator {
       case "%":
         return new ZNumber(left.toNumber() % right.toNumber());
       case "==":
-        return new ZBoolean(this.isEqual(left, right));
+        return new ZBool(this.isEqual(left, right));
       case "!=":
-        return new ZBoolean(!this.isEqual(left, right));
+        return new ZBool(!this.isEqual(left, right));
       case "<":
-        return new ZBoolean(left.toNumber() < right.toNumber());
+        return new ZBool(left.toNumber() < right.toNumber());
       case ">":
-        return new ZBoolean(left.toNumber() > right.toNumber());
+        return new ZBool(left.toNumber() > right.toNumber());
       case "<=":
-        return new ZBoolean(left.toNumber() <= right.toNumber());
+        return new ZBool(left.toNumber() <= right.toNumber());
       case ">=":
-        return new ZBoolean(left.toNumber() >= right.toNumber());
+        return new ZBool(left.toNumber() >= right.toNumber());
       case "&&":
         return left.isTruthy() ? right : left;
       case "||":
@@ -293,7 +289,7 @@ export class Interpreter implements Evaluator {
       case "-":
         return new ZNumber(-arg.toNumber());
       case "!":
-        return new ZBoolean(!arg.isTruthy());
+        return new ZBool(!arg.isTruthy());
     }
   }
 
@@ -390,7 +386,7 @@ export class Interpreter implements Evaluator {
     }
 
     const callee = this.evaluate(expr.callee, env);
-    if (!isCallable(callee)) {
+    if (!(callee instanceof ZFunction)) {
       throw new Error("Not a function");
     }
 
@@ -403,17 +399,13 @@ export class Interpreter implements Evaluator {
       callEnv.define(callee.params[i]!, args[i] ?? ZNull.instance);
     }
 
-    if (callee instanceof ZArrowFunction && callee.body.type !== "BlockStatement") {
+    if (callee.isExpression) {
       return this.evaluate(callee.body as Expression, callEnv);
     }
 
     try {
-      const body =
-        callee instanceof ZArrowFunction
-          ? (callee.body as BlockStatement)
-          : callee.body;
       let lastValue: ZValue = ZNull.instance;
-      for (const stmt of body.body) {
+      for (const stmt of (callee.body as BlockStatement).body) {
         lastValue = this.executeStatement(stmt, callEnv);
       }
       return lastValue;
@@ -462,7 +454,8 @@ export class Interpreter implements Evaluator {
     expr: ArrowFunctionExpression,
     env: Environment,
   ): ZValue {
-    return new ZArrowFunction(
+    return new ZFunction(
+      "<anonymous>",
       expr.params.map((p) => p.name),
       expr.body,
       env,

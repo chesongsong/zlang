@@ -1,6 +1,6 @@
 import type { ComponentRenderer, Disposable } from "@z-lang/render";
 
-export class HtmlMarkdownRenderer implements ComponentRenderer<string> {
+export class MarkdownRenderer implements ComponentRenderer<string> {
   render(content: string, container: HTMLElement): Disposable {
     const block = document.createElement("div");
     block.className = "zlang-markdown";

@@ -1,36 +1,28 @@
 export { ZValue } from "./base.js";
-export { ZNumber } from "./znumber.js";
-export { ZString } from "./zstring.js";
-export { ZBoolean } from "./zboolean.js";
-export { ZNull } from "./znull.js";
-export { ZArray } from "./zarray.js";
-export { ZObject } from "./zobject.js";
-export { ZFunction } from "./zfunction.js";
-export { ZArrowFunction } from "./zarrow-function.js";
-export { ZTable } from "./ztable.js";
-export type { TableColumn, RenderTable, RenderColumn } from "./ztable.js";
+export { ZNumber } from "./number.js";
+export { ZString } from "./string.js";
+export { ZBool } from "./bool.js";
+export { ZNull } from "./null.js";
+export { ZArray } from "./array.js";
+export { ZObject } from "./object.js";
+export { ZFunction } from "./function.js";
+export { ZDate } from "./date.js";
 
 import { ZValue } from "./base.js";
-import { ZNumber } from "./znumber.js";
-import { ZString } from "./zstring.js";
-import { ZBoolean } from "./zboolean.js";
-import { ZNull } from "./znull.js";
-import { ZArray } from "./zarray.js";
-import { ZObject } from "./zobject.js";
-import { ZFunction } from "./zfunction.js";
-import { ZArrowFunction } from "./zarrow-function.js";
-
-export type ZCallable = ZFunction | ZArrowFunction;
-
-export function isCallable(v: ZValue): v is ZCallable {
-  return v instanceof ZFunction || v instanceof ZArrowFunction;
-}
+import { ZNumber } from "./number.js";
+import { ZString } from "./string.js";
+import { ZBool } from "./bool.js";
+import { ZNull } from "./null.js";
+import { ZArray } from "./array.js";
+import { ZObject } from "./object.js";
+import { ZDate } from "./date.js";
 
 export function box(value: unknown): ZValue {
   if (value === null || value === undefined) return ZNull.instance;
   if (typeof value === "number") return new ZNumber(value);
   if (typeof value === "string") return new ZString(value);
-  if (typeof value === "boolean") return new ZBoolean(value);
+  if (typeof value === "boolean") return new ZBool(value);
+  if (value instanceof Date) return new ZDate(value);
 
   if (Array.isArray(value)) {
     return new ZArray(value.map(box));

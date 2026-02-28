@@ -1,6 +1,6 @@
 import type { OutputSegment } from "@z-lang/interpreter";
 import { ZValue } from "@z-lang/interpreter";
-import type { ComponentFactory, Disposable, RenderTable } from "./types.js";
+import type { ComponentFactory, Disposable } from "./types.js";
 
 export class RenderEngine {
   private factory: ComponentFactory;
@@ -36,14 +36,14 @@ export class RenderEngine {
 
     for (const segment of segments) {
       if (segment.type === "markdown") {
-        this.renderMarkdownSegment(segment.content, container);
+        this.renderMarkdown(segment.content, container);
       } else {
-        this.renderScopeSegment(segment.result, container);
+        this.renderScope(segment.result, container);
       }
     }
   }
 
-  private renderMarkdownSegment(content: string, container: HTMLElement): void {
+  private renderMarkdown(content: string, container: HTMLElement): void {
     const wrapper = document.createElement("div");
     wrapper.className = "render-segment render-markdown";
     container.appendChild(wrapper);
@@ -53,7 +53,7 @@ export class RenderEngine {
     this.disposables.push(disposable);
   }
 
-  private renderScopeSegment(
+  private renderScope(
     result: { value: ZValue; error?: string },
     container: HTMLElement,
   ): void {
@@ -65,23 +65,9 @@ export class RenderEngine {
       return;
     }
 
-    const value = result.value;
-
-    if (value.kind === "table") {
-      const renderTable = value.unbox() as RenderTable;
-      const wrapper = document.createElement("div");
-      wrapper.className = "render-segment render-table";
-      container.appendChild(wrapper);
-
-      const renderer = this.factory.createTableRenderer();
-      const disposable = renderer.render(renderTable, wrapper);
-      this.disposables.push(disposable);
-      return;
-    }
-
-    const formatted = value.toString();
+    const formatted = result.value.toString();
     const wrapper = document.createElement("div");
-    wrapper.className = "render-segment render-markdown";
+    wrapper.className = "render-segment render-scope";
     container.appendChild(wrapper);
 
     const renderer = this.factory.createMarkdownRenderer();

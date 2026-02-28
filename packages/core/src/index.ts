@@ -11,21 +11,13 @@ export {
   ZValue,
   ZNumber,
   ZString,
-  ZBoolean,
+  ZBool,
   ZNull,
   ZArray,
   ZObject,
   ZFunction,
-  ZArrowFunction,
-  ZTable,
-  isCallable,
+  ZDate,
   box,
-} from "@z-lang/interpreter";
-export type {
-  ZCallable,
-  TableColumn,
-  RenderTable,
-  RenderColumn,
 } from "@z-lang/interpreter";
 
 // Interpreter & execution

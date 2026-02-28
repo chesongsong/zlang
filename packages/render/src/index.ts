@@ -1,6 +1,4 @@
 export type {
-  RenderTable,
-  RenderColumn,
   Disposable,
   ComponentRenderer,
   ComponentFactory,

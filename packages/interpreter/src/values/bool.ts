@@ -1,6 +1,6 @@
 import { ZValue } from "./base.js";
 
-export class ZBoolean extends ZValue {
+export class ZBool extends ZValue {
   readonly value: boolean;
 
   constructor(value: boolean) {

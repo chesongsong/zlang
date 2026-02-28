@@ -5,11 +5,14 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc --build"
   },
   "dependencies": {
-    "@z-lang/types": "*"
+    "@z-lang/types": "*",
+    "dayjs": "^1.11.19"
   }
 }

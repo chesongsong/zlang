@@ -1,5 +1,5 @@
 import { ZValue } from "./base.js";
-import { ZNull } from "./znull.js";
+import { ZNull } from "./null.js";
 
 export class ZObject extends ZValue {
   readonly entries: Record<string, ZValue>;
