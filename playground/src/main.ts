@@ -2,7 +2,9 @@ import * as monaco from "monaco-editor";
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import { run } from "@z-lang/core";
 import { RenderEngine } from "@z-lang/render";
+import type { ComponentFactory } from "@z-lang/render";
 import { HtmlComponentFactory } from "./renderers/html-factory";
+import { ElementComponentFactory } from "./renderers/element-factory";
 import { registerZLang, createZLangTheme, ZLANG_ID } from "./monaco-lang";
 import "./style.css";
 
@@ -19,12 +21,17 @@ const editorContainer = document.getElementById("editor")!;
 const output = document.getElementById("output-content")!;
 const divider = document.getElementById("divider")!;
 
-const factory = new HtmlComponentFactory();
-const renderEngine = new RenderEngine(factory);
+const factories: Record<string, ComponentFactory> = {
+  html: new HtmlComponentFactory(),
+  element: new ElementComponentFactory(),
+};
+
+let currentRendererKey = "html";
+const renderEngine = new RenderEngine(factories[currentRendererKey]!);
 
 const DEFAULT_CODE = `# z-lang Playground
 
-在下方编写 z-lang 代码：
+在下方编写 z-lang 代码，右上角可切换渲染器：
 
 \`\`\`
 变量A = 9999
@@ -32,7 +39,7 @@ records = [{ 变量A: 1, 名字: "Alice" }, { 变量A: 2, 名字: "Bob" }, { 变
 TB = rtable(records, 输出1 = 变量A, 名字 = 自己.名字)
 \`\`\`
 
-上面的代码会渲染一个表格。
+上面的代码会渲染一个表格，试试切换到 Element Plus 看看效果。
 `;
 
 const editor = monaco.editor.create(editorContainer, {
@@ -80,6 +87,31 @@ function execute() {
     errDiv.textContent = message;
     output.appendChild(errDiv);
   }
+}
+
+function switchRenderer(key: string) {
+  if (key === currentRendererKey) return;
+
+  const factory = factories[key];
+  if (!factory) return;
+
+  currentRendererKey = key;
+  renderEngine.setFactory(factory);
+
+  const buttons = document.querySelectorAll<HTMLButtonElement>(".toggle-btn");
+  for (const btn of buttons) {
+    btn.classList.toggle("active", btn.dataset.renderer === key);
+  }
+
+  execute();
+}
+
+const toggleButtons = document.querySelectorAll<HTMLButtonElement>(".toggle-btn");
+for (const btn of toggleButtons) {
+  btn.addEventListener("click", () => {
+    const key = btn.dataset.renderer;
+    if (key) switchRenderer(key);
+  });
 }
 
 editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
