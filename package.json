@@ -10,11 +10,13 @@
     "packages/core"
   ],
   "scripts": {
-    "generate": "antlr-ng -Dlanguage=TypeScript -v -o packages/parser/src/generated --exact-output-dir packages/parser/grammar/ZLangLexer.g4 packages/parser/grammar/ZLangParser.g4",
+    "generate:lexer": "antlr-ng -Dlanguage=TypeScript -v -o packages/parser/src/generated --exact-output-dir -- packages/parser/grammar/ZLangLexer.g4",
+    "generate:parser": "antlr-ng -Dlanguage=TypeScript -v -o packages/parser/src/generated --exact-output-dir --lib packages/parser/src/generated -- packages/parser/grammar/ZLangParser.g4",
+    "generate": "npm run generate:lexer && npm run generate:parser",
     "build:ts": "tsc --build tsconfig.json",
     "build:bundle": "node scripts/build.mjs",
     "build": "npm run generate && npm run build:ts && npm run build:bundle",
-    "clean": "rm -rf packages/*/dist packages/parser/src/generated/*.ts packages/parser/src/generated/*.interp packages/parser/src/generated/*.tokens"
+    "clean": "rm -rf packages/*/dist packages/*/*.tsbuildinfo packages/parser/src/generated/*.ts packages/parser/src/generated/*.interp packages/parser/src/generated/*.tokens"
   },
   "devDependencies": {
     "antlr-ng": "^1.0.10",
