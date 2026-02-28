@@ -1,6 +1,6 @@
 import { run } from "@z-lang/core";
 import { EXAMPLES } from "./examples";
-import { renderResults } from "./renderer";
+import { renderSegments } from "./renderer";
 import "./style.css";
 
 const editor = document.getElementById("editor") as HTMLTextAreaElement;
@@ -30,7 +30,7 @@ function execute() {
   const startTime = performance.now();
 
   try {
-    const { scopeResults, errors } = run(source);
+    const { segments, errors } = run(source);
     const elapsed = (performance.now() - startTime).toFixed(1);
 
     if (errors.length === 0) {
@@ -41,7 +41,7 @@ function execute() {
       status.className = "status err";
     }
 
-    output.innerHTML = renderResults(scopeResults, errors);
+    output.innerHTML = renderSegments(segments, errors);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     status.textContent = "✗ Fatal error";

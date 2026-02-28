@@ -431,6 +431,58 @@ html, body {
   margin-bottom: 16px;
 }
 
+/* Markdown blocks */
+.md-block {
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border-left: 3px solid var(--accent);
+  background: rgba(88, 166, 255, 0.04);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.md-h1 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 4px 0 8px;
+}
+
+.md-h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 4px 0 6px;
+}
+
+.md-h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 4px 0 4px;
+}
+
+.md-p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 2px 0;
+}
+
+.md-li {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  padding-left: 16px;
+  position: relative;
+}
+
+.md-li::before {
+  content: "•";
+  position: absolute;
+  left: 4px;
+  color: var(--accent);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   #main {

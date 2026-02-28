@@ -8,7 +8,7 @@ export { type ASTVisitor, visitNode } from "@z-lang/ast";
 
 // Interpreter
 export { Interpreter, execute, formatValue } from "@z-lang/interpreter";
-export type { ZValue, ZObject, ZFunction, ZArrowFunction, ScopeResult } from "@z-lang/interpreter";
+export type { ZValue, ZObject, ZFunction, ZArrowFunction, ScopeResult, OutputSegment, MarkdownSegment, ScopeSegment } from "@z-lang/interpreter";
 
 // All types
 export type {

@@ -37,6 +37,18 @@ export interface ScopeResult {
   readonly error?: string;
 }
 
+export interface MarkdownSegment {
+  readonly type: "markdown";
+  readonly content: string;
+}
+
+export interface ScopeSegment {
+  readonly type: "scope";
+  readonly result: ScopeResult;
+}
+
+export type OutputSegment = MarkdownSegment | ScopeSegment;
+
 export class ReturnSignal {
   constructor(public readonly value: ZValue) {}
 }
