@@ -8,6 +8,7 @@ import { execute } from "@z-lang/interpreter";
 import type { OutputSegment } from "@z-lang/interpreter";
 import type { Program } from "@z-lang/types";
 import { ParseError } from "@z-lang/types";
+import { SourceSplitter } from "./splitter.js";
 
 export interface ParseOptions {
   readonly sourceName?: string;
@@ -42,28 +43,9 @@ export function parse(source: string, _options?: ParseOptions): ParseOutput {
   return { ast, errors: [] };
 }
 
-function splitSource(source: string): Array<{ type: "markdown"; content: string } | { type: "code"; content: string }> {
-  const fence = "```";
-  const parts = source.split(fence);
-  const segments: Array<{ type: "markdown"; content: string } | { type: "code"; content: string }> = [];
-
-  for (let i = 0; i < parts.length; i++) {
-    const content = parts[i]!;
-    if (i % 2 === 0) {
-      const trimmed = content.trim();
-      if (trimmed) {
-        segments.push({ type: "markdown", content: trimmed });
-      }
-    } else {
-      segments.push({ type: "code", content });
-    }
-  }
-
-  return segments;
-}
-
 export function run(source: string, _options?: ParseOptions): RunOutput {
-  const rawSegments = splitSource(source);
+  const splitter = new SourceSplitter();
+  const rawSegments = splitter.split(source);
   const outputSegments: OutputSegment[] = [];
   const allErrors: ParseError[] = [];
   let scopeIndex = 0;
@@ -71,6 +53,15 @@ export function run(source: string, _options?: ParseOptions): RunOutput {
   for (const seg of rawSegments) {
     if (seg.type === "markdown") {
       outputSegments.push({ type: "markdown", content: seg.content });
+      continue;
+    }
+
+    if (seg.type === "codeblock") {
+      outputSegments.push({
+        type: "codeblock",
+        language: seg.language ?? "text",
+        content: seg.content,
+      });
       continue;
     }
 

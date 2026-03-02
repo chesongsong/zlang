@@ -246,6 +246,57 @@ html, body {
   color: var(--accent);
 }
 
+/* Code Block */
+.render-codeblock {
+  margin-bottom: 16px;
+}
+
+.zlang-codeblock {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #f6f8fa;
+}
+
+.codeblock-header {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  text-transform: lowercase;
+}
+
+.codeblock-content {
+  margin: 0;
+  padding: 12px 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-x: auto;
+  background: #f6f8fa;
+}
+
+.codeblock-content code {
+  font-family: inherit;
+  color: var(--text);
+}
+
+/* Scope Result */
+.render-scope {
+  margin-bottom: 12px;
+}
+
+.render-scope .zlang-markdown .md-p {
+  font-family: var(--font-mono);
+  color: var(--green);
+  background: #f0fff4;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  border: 1px solid #c6f6d5;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   #main {

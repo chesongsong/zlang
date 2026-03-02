@@ -1,8 +1,9 @@
-import type { ComponentFactory, ComponentRenderer } from "@z-lang/render";
+import type { ComponentFactory, ComponentRenderer, CodeBlockData } from "@z-lang/render";
 import { MarkdownRenderer } from "./markdown-renderer.js";
+import { CodeBlockRenderer } from "./code-block-renderer.js";
 import { ElementTableRenderer } from "./element-table-renderer.js";
 
-const renderers: Record<string, () => ComponentRenderer> = {
+const renderableRenderers: Record<string, () => ComponentRenderer> = {
   rtable: () => new ElementTableRenderer(),
 };
 
@@ -11,8 +12,12 @@ export class ElementComponentFactory implements ComponentFactory {
     return new MarkdownRenderer();
   }
 
+  createCodeBlockRenderer(): ComponentRenderer<CodeBlockData> {
+    return new CodeBlockRenderer();
+  }
+
   createRenderer(type: string): ComponentRenderer | null {
-    const factory = renderers[type];
+    const factory = renderableRenderers[type];
     return factory ? factory() : null;
   }
 }

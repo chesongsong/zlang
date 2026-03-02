@@ -16,4 +16,10 @@ export interface ScopeSegment {
   readonly result: ScopeResult;
 }
 
-export type OutputSegment = MarkdownSegment | ScopeSegment;
+export interface CodeBlockSegment {
+  readonly type: "codeblock";
+  readonly language: string;
+  readonly content: string;
+}
+
+export type OutputSegment = MarkdownSegment | ScopeSegment | CodeBlockSegment;

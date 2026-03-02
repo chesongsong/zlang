@@ -23,15 +23,32 @@ const renderEngine = new RenderEngine(new ElementComponentFactory());
 
 const DEFAULT_CODE = `# z-lang Playground
 
-欢迎使用 z-lang，在下方编写代码：
+欢迎使用 z-lang，支持混合 Markdown 和代码。
 
-\`\`\`
+## 执行 z-lang 代码
+
+使用空语言标记或 \`z-lang\` 标记的代码块会被执行：
+
+\`\`\`z-lang
 名字 = "World"
 问候 = "Hello, " + 名字 + "!"
 问候
 \`\`\`
 
-支持函数定义和 rtable 渲染表格：
+## 普通代码块（仅展示）
+
+其他语言标记的代码块会保留原样展示：
+
+\`\`\`python
+def greet(name):
+    return f"Hello, {name}!"
+\`\`\`
+
+\`\`\`javascript
+const greet = (name) => \`Hello, \${name}!\`;
+\`\`\`
+
+## rtable 渲染表格
 
 \`\`\`
 records = [{ 姓名: "Alice", 年龄: 25 }, { 姓名: "Bob", 年龄: 30 }, { 姓名: "Charlie", 年龄: 28 }]

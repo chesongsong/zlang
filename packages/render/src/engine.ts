@@ -35,10 +35,16 @@ export class RenderEngine {
     }
 
     for (const segment of segments) {
-      if (segment.type === "markdown") {
-        this.renderMarkdown(segment.content, container);
-      } else {
-        this.renderScope(segment.result, container);
+      switch (segment.type) {
+        case "markdown":
+          this.renderMarkdown(segment.content, container);
+          break;
+        case "codeblock":
+          this.renderCodeBlock(segment.language, segment.content, container);
+          break;
+        case "scope":
+          this.renderScope(segment.result, container);
+          break;
       }
     }
   }
@@ -50,6 +56,20 @@ export class RenderEngine {
 
     const renderer = this.factory.createMarkdownRenderer();
     const disposable = renderer.render(content, wrapper);
+    this.disposables.push(disposable);
+  }
+
+  private renderCodeBlock(
+    language: string,
+    content: string,
+    container: HTMLElement,
+  ): void {
+    const wrapper = document.createElement("div");
+    wrapper.className = "render-segment render-codeblock";
+    container.appendChild(wrapper);
+
+    const renderer = this.factory.createCodeBlockRenderer();
+    const disposable = renderer.render({ language, content }, wrapper);
     this.disposables.push(disposable);
   }
 
