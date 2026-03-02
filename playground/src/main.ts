@@ -44,16 +44,21 @@ def greet(name):
     return f"Hello, {name}!"
 \`\`\`
 
-\`\`\`javascript
-const greet = (name) => \`Hello, \${name}!\`;
-\`\`\`
-
 ## rtable 渲染表格
 
 \`\`\`
 records = [{ 姓名: "Alice", 年龄: 25 }, { 姓名: "Bob", 年龄: 30 }, { 姓名: "Charlie", 年龄: 28 }]
 rtable(records, 姓名 = 自己.姓名, 年龄 = 自己.年龄)
 \`\`\`
+
+## 骨架屏演示
+
+当 z-lang 代码块未闭合时，会显示骨架屏（模拟流式输出）：
+
+\`\`\`z-lang
+数据 = [1, 2, 3, 4, 5]
+总和 = 0
+// 模拟 AI 正在生成更多代码...
 `;
 
 const editor = monaco.editor.create(editorContainer, {

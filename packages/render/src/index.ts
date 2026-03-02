@@ -2,6 +2,7 @@ export type {
   Disposable,
   ComponentRenderer,
   CodeBlockData,
+  PendingData,
   ComponentFactory,
 } from "./types.js";
 

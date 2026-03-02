@@ -11,8 +11,14 @@ export interface CodeBlockData {
   readonly content: string;
 }
 
+export interface PendingData {
+  readonly language: string;
+  readonly content: string;
+}
+
 export interface ComponentFactory {
   createMarkdownRenderer(): ComponentRenderer<string>;
   createCodeBlockRenderer(): ComponentRenderer<CodeBlockData>;
+  createPendingRenderer(): ComponentRenderer<PendingData>;
   createRenderer(type: string): ComponentRenderer | null;
 }

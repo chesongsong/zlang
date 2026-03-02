@@ -42,6 +42,9 @@ export class RenderEngine {
         case "codeblock":
           this.renderCodeBlock(segment.language, segment.content, container);
           break;
+        case "pending":
+          this.renderPending(segment.language, segment.content, container);
+          break;
         case "scope":
           this.renderScope(segment.result, container);
           break;
@@ -69,6 +72,20 @@ export class RenderEngine {
     container.appendChild(wrapper);
 
     const renderer = this.factory.createCodeBlockRenderer();
+    const disposable = renderer.render({ language, content }, wrapper);
+    this.disposables.push(disposable);
+  }
+
+  private renderPending(
+    language: string,
+    content: string,
+    container: HTMLElement,
+  ): void {
+    const wrapper = document.createElement("div");
+    wrapper.className = "render-segment render-pending";
+    container.appendChild(wrapper);
+
+    const renderer = this.factory.createPendingRenderer();
     const disposable = renderer.render({ language, content }, wrapper);
     this.disposables.push(disposable);
   }

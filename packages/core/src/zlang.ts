@@ -65,6 +65,15 @@ export function run(source: string, _options?: ParseOptions): RunOutput {
       continue;
     }
 
+    if (seg.type === "pending") {
+      outputSegments.push({
+        type: "pending",
+        language: seg.language ?? "z-lang",
+        content: seg.content,
+      });
+      continue;
+    }
+
     const wrappedSource = "```" + seg.content + "```";
     const { ast, errors } = parse(wrappedSource, _options);
 

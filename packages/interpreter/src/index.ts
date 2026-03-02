@@ -28,6 +28,7 @@ export type {
   MarkdownSegment,
   ScopeSegment,
   CodeBlockSegment,
+  PendingSegment,
   OutputSegment,
 } from "./segments.js";
 

@@ -22,4 +22,14 @@ export interface CodeBlockSegment {
   readonly content: string;
 }
 
-export type OutputSegment = MarkdownSegment | ScopeSegment | CodeBlockSegment;
+export interface PendingSegment {
+  readonly type: "pending";
+  readonly language: string;
+  readonly content: string;
+}
+
+export type OutputSegment =
+  | MarkdownSegment
+  | ScopeSegment
+  | CodeBlockSegment
+  | PendingSegment;

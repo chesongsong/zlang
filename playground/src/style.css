@@ -297,6 +297,71 @@ html, body {
   border: 1px solid #c6f6d5;
 }
 
+/* Pending / Skeleton */
+.render-pending {
+  margin-bottom: 16px;
+}
+
+.zlang-pending {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.pending-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(90deg, #f0f7ff 0%, #e8f4fd 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.pending-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.pending-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.pending-skeleton {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton-line {
+  height: 14px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e8e8e8 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.9); }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   #main {

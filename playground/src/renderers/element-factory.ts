@@ -1,6 +1,12 @@
-import type { ComponentFactory, ComponentRenderer, CodeBlockData } from "@z-lang/render";
+import type {
+  ComponentFactory,
+  ComponentRenderer,
+  CodeBlockData,
+  PendingData,
+} from "@z-lang/render";
 import { MarkdownRenderer } from "./markdown-renderer.js";
 import { CodeBlockRenderer } from "./code-block-renderer.js";
+import { PendingRenderer } from "./pending-renderer.js";
 import { ElementTableRenderer } from "./element-table-renderer.js";
 
 const renderableRenderers: Record<string, () => ComponentRenderer> = {
@@ -14,6 +20,10 @@ export class ElementComponentFactory implements ComponentFactory {
 
   createCodeBlockRenderer(): ComponentRenderer<CodeBlockData> {
     return new CodeBlockRenderer();
+  }
+
+  createPendingRenderer(): ComponentRenderer<PendingData> {
+    return new PendingRenderer();
   }
 
   createRenderer(type: string): ComponentRenderer | null {
