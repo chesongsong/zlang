@@ -33,7 +33,7 @@ const jsData = {
 
 const DEFAULT_CODE = `# z-lang Playground
 
-欢迎使用 z-lang，支持混合 Markdown 和代码。
+欢迎使用 z-lang，只有标记 \`z-lang\` 的代码块会被执行。
 
 ## 执行 z-lang 代码
 
@@ -43,24 +43,38 @@ const DEFAULT_CODE = `# z-lang Playground
 问候
 \`\`\`
 
-## 普通代码块（仅展示）
+## 普通代码块（Markdown 渲染）
+
+没有 \`z-lang\` 标记的代码块按 Markdown 原样展示：
 
 \`\`\`python
 def greet(name):
     return f"Hello, {name}!"
 \`\`\`
 
+\`\`\`javascript
+const greet = (name) => \`Hello, \${name}!\`;
+\`\`\`
+
 ## JS 注入变量 → z-lang 渲染
 
 以下变量由 JS 注入：\`公司名\`、\`用户列表\`
 
-\`\`\`
+\`\`\`z-lang
 标题 = 公司名 + " - 员工花名册"
 标题
 \`\`\`
 
+自动推断所有列：
+
+\`\`\`z-lang
+rtable(用户列表)
 \`\`\`
-rtable(用户列表, 姓名 = 自己.姓名, 部门 = 自己.部门, 薪资 = 自己.薪资)
+
+选择部分列：
+
+\`\`\`z-lang
+rtable(用户列表, 姓名, 薪资)
 \`\`\`
 `;
 

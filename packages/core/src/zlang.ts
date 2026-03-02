@@ -64,15 +64,6 @@ export function run(source: string, options?: RunOptions): RunOutput {
       continue;
     }
 
-    if (seg.type === "codeblock") {
-      outputSegments.push({
-        type: "codeblock",
-        language: seg.language ?? "text",
-        content: seg.content,
-      });
-      continue;
-    }
-
     if (seg.type === "pending") {
       outputSegments.push({
         type: "pending",

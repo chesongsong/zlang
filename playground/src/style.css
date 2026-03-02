@@ -246,19 +246,16 @@ html, body {
   color: var(--accent);
 }
 
-/* Code Block */
-.render-codeblock {
-  margin-bottom: 16px;
-}
-
-.zlang-codeblock {
+/* Markdown Code Block */
+.md-codeblock {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
   background: #f6f8fa;
+  margin: 8px 0;
 }
 
-.codeblock-header {
+.md-codeblock-header {
   padding: 6px 12px;
   font-size: 12px;
   font-weight: 500;
@@ -268,7 +265,7 @@ html, body {
   text-transform: lowercase;
 }
 
-.codeblock-content {
+.md-codeblock-content {
   margin: 0;
   padding: 12px 14px;
   font-family: var(--font-mono);
@@ -278,7 +275,7 @@ html, body {
   background: #f6f8fa;
 }
 
-.codeblock-content code {
+.md-codeblock-content code {
   font-family: inherit;
   color: var(--text);
 }

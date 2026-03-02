@@ -29,34 +29,88 @@ export class RtableBuiltin implements BuiltinFunction {
       throw new Error("rtable first argument must be an array");
     }
 
-    const namedArgs: NamedArgument[] = [];
-    for (let i = 1; i < args.length; i++) {
-      const arg = args[i]!;
-      if (arg.type !== "NamedArgument") {
-        throw new Error(
-          "rtable column definitions must be named arguments (name = expression)",
-        );
-      }
-      namedArgs.push(arg);
+    const columnArgs = args.slice(1);
+
+    if (columnArgs.length === 0) {
+      return new ZRenderTable(this.inferColumns(recordsVal));
     }
 
-    const columns: TableColumn[] = namedArgs.map((na) => {
-      const values: ZValue[] = recordsVal.elements.map((record) => {
-        const recordEnv = new Environment(env);
+    const columns = this.resolveColumns(columnArgs, recordsVal, env, evaluator);
+    return new ZRenderTable(columns);
+  }
 
-        if (record instanceof ZObject) {
-          for (const [key, val] of Object.entries(record.entries)) {
-            recordEnv.define(key, val);
+  private inferColumns(records: ZArray): TableColumn[] {
+    const keySet = new Set<string>();
+    const keyOrder: string[] = [];
+
+    for (const record of records.elements) {
+      if (record instanceof ZObject) {
+        for (const key of Object.keys(record.entries)) {
+          if (!keySet.has(key)) {
+            keySet.add(key);
+            keyOrder.push(key);
           }
-          recordEnv.define("自己", record);
         }
+      }
+    }
 
-        return evaluator.evaluate(na.value, recordEnv);
-      });
+    return keyOrder.map((key) => ({
+      name: key,
+      values: records.elements.map((record) =>
+        record instanceof ZObject ? record.get(key) : record,
+      ),
+    }));
+  }
 
-      return { name: na.name, values };
+  private resolveColumns(
+    columnArgs: readonly CallArgument[],
+    records: ZArray,
+    env: Environment,
+    evaluator: Evaluator,
+  ): TableColumn[] {
+    return columnArgs.map((arg) => {
+      if (arg.type === "NamedArgument") {
+        return this.resolveNamedColumn(arg, records, env, evaluator);
+      }
+
+      if (arg.type === "Identifier") {
+        return this.resolveFieldColumn(arg.name, records);
+      }
+
+      throw new Error(
+        "rtable column must be a field name or named argument (name = expression)",
+      );
+    });
+  }
+
+  private resolveNamedColumn(
+    na: NamedArgument,
+    records: ZArray,
+    env: Environment,
+    evaluator: Evaluator,
+  ): TableColumn {
+    const values: ZValue[] = records.elements.map((record) => {
+      const recordEnv = new Environment(env);
+
+      if (record instanceof ZObject) {
+        for (const [key, val] of Object.entries(record.entries)) {
+          recordEnv.define(key, val);
+        }
+        recordEnv.define("自己", record);
+      }
+
+      return evaluator.evaluate(na.value, recordEnv);
     });
 
-    return new ZRenderTable(columns);
+    return { name: na.name, values };
+  }
+
+  private resolveFieldColumn(name: string, records: ZArray): TableColumn {
+    return {
+      name,
+      values: records.elements.map((record) =>
+        record instanceof ZObject ? record.get(name) : record,
+      ),
+    };
   }
 }

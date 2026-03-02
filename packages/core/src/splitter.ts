@@ -1,4 +1,4 @@
-export type RawSegmentType = "markdown" | "zlang" | "codeblock" | "pending";
+export type RawSegmentType = "markdown" | "zlang" | "pending";
 
 export interface RawSegment {
   readonly type: RawSegmentType;
@@ -6,7 +6,7 @@ export interface RawSegment {
   readonly language?: string;
 }
 
-const ZLANG_LANGUAGES = new Set(["z-lang", "zlang", "z", ""]);
+const ZLANG_LANGUAGES = new Set(["z-lang", "zlang", "z"]);
 
 export class SourceSplitter {
   split(source: string): RawSegment[] {
@@ -21,65 +21,63 @@ export class SourceSplitter {
       const isInsideCodeBlock = i % 2 === 1;
 
       if (!isInsideCodeBlock) {
-        const trimmed = part.trim();
-        if (trimmed) {
-          segments.push({ type: "markdown", content: trimmed });
-        }
+        this.pushMarkdown(segments, part);
       } else {
         const isPending = isUnclosed && isLastPart;
-        const parsed = this.parseCodeBlock(part, isPending);
-        segments.push(parsed);
+        const classified = this.classifyCodeBlock(part, isPending);
+
+        if (classified.type === "markdown") {
+          this.pushMarkdown(segments, classified.content);
+        } else {
+          segments.push(classified);
+        }
       }
     }
 
     return segments;
   }
 
-  private parseCodeBlock(content: string, isPending: boolean): RawSegment {
-    const firstNewline = content.indexOf("\n");
+  private pushMarkdown(segments: RawSegment[], content: string): void {
+    const trimmed = content.trim();
+    if (!trimmed) return;
 
-    if (firstNewline === -1) {
-      return this.classifyCodeBlock("", content.trim(), isPending);
+    const last = segments[segments.length - 1];
+    if (last?.type === "markdown") {
+      segments[segments.length - 1] = {
+        type: "markdown",
+        content: last.content + "\n\n" + trimmed,
+      };
+    } else {
+      segments.push({ type: "markdown", content: trimmed });
     }
-
-    const firstLine = content.slice(0, firstNewline).trim();
-    const codeContent = content.slice(firstNewline + 1);
-
-    return this.classifyCodeBlock(firstLine, codeContent, isPending);
   }
 
   private classifyCodeBlock(
-    langTag: string,
     content: string,
     isPending: boolean,
   ): RawSegment {
-    const lang = langTag.toLowerCase();
-    const isZlang = !lang || ZLANG_LANGUAGES.has(lang);
+    const firstNewline = content.indexOf("\n");
+    const langTag = firstNewline === -1
+      ? ""
+      : content.slice(0, firstNewline).trim();
+    const codeContent = firstNewline === -1
+      ? content.trim()
+      : content.slice(firstNewline + 1);
+
+    const isZlang = ZLANG_LANGUAGES.has(langTag.toLowerCase());
 
     if (isPending && isZlang) {
-      return {
-        type: "pending",
-        language: langTag || "z-lang",
-        content,
-      };
+      return { type: "pending", language: langTag, content: codeContent };
     }
 
     if (isZlang) {
-      return { type: "zlang", content };
+      return { type: "zlang", content: codeContent };
     }
 
-    if (isPending) {
-      return {
-        type: "codeblock",
-        language: langTag || "text",
-        content,
-      };
-    }
-
+    const fenceTag = langTag ? "```" + langTag : "```";
     return {
-      type: "codeblock",
-      language: langTag || "text",
-      content,
+      type: "markdown",
+      content: fenceTag + "\n" + codeContent + "```",
     };
   }
 }
