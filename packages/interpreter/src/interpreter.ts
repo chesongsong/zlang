@@ -33,17 +33,20 @@ import { ZFunction } from "./values/function.js";
 import { ReturnSignal, BreakSignal, ContinueSignal } from "./signals.js";
 import type { ScopeResult } from "./segments.js";
 import { BuiltinRegistry } from "./builtins/registry.js";
-import type { Evaluator } from "./builtins/registry.js";
-import { RtableBuiltin } from "./builtins/rtable.js";
+import type { BuiltinFunction, Evaluator } from "./builtins/registry.js";
 
 const MAX_LOOP_ITERATIONS = 100_000;
 
 export class Interpreter implements Evaluator {
   private readonly builtins: BuiltinRegistry;
 
-  constructor() {
+  constructor(externalBuiltins?: Map<string, BuiltinFunction>) {
     this.builtins = new BuiltinRegistry();
-    this.builtins.register("rtable", new RtableBuiltin());
+    if (externalBuiltins) {
+      for (const [name, fn] of externalBuiltins) {
+        this.builtins.register(name, fn);
+      }
+    }
   }
 
   executeProgram(

@@ -3,7 +3,7 @@ import { ElTable, ElTableColumn } from "element-plus";
 import "element-plus/es/components/table/style/css";
 import "element-plus/es/components/table-column/style/css";
 import type { ComponentRenderer, Disposable } from "@z-lang/render";
-import type { RenderTableData } from "@z-lang/interpreter";
+import type { RenderTableData } from "../renderables/rtable";
 
 export class ElementTableRenderer implements ComponentRenderer<RenderTableData> {
   render(value: RenderTableData, container: HTMLElement): Disposable {

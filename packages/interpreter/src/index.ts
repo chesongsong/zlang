@@ -12,12 +12,7 @@ export { box } from "./values/index.js";
 
 // Renderables — UI-renderable value types
 export { ZRenderable } from "./renderables/base.js";
-export { ZRenderTable } from "./renderables/table.js";
-export type {
-  TableColumn,
-  RenderTableData,
-  RenderTableColumn,
-} from "./renderables/table.js";
+export { ZRenderCustom } from "./renderables/custom.js";
 
 // Signals
 export { ReturnSignal, BreakSignal, ContinueSignal } from "./signals.js";
@@ -38,7 +33,6 @@ export { Environment } from "./environment.js";
 // Builtins
 export { BuiltinRegistry } from "./builtins/registry.js";
 export type { BuiltinFunction, Evaluator } from "./builtins/registry.js";
-export { RtableBuiltin } from "./builtins/rtable.js";
 
 // Interpreter
 export { Interpreter } from "./interpreter.js";
@@ -47,18 +41,20 @@ export { Interpreter } from "./interpreter.js";
 import { Interpreter } from "./interpreter.js";
 import { Environment } from "./environment.js";
 import { box } from "./values/index.js";
+import type { BuiltinFunction } from "./builtins/registry.js";
 import type { Program } from "@z-lang/types";
 import type { ScopeResult } from "./segments.js";
 
 export interface ExecuteOptions {
   readonly variables?: Record<string, unknown>;
+  readonly builtins?: Map<string, BuiltinFunction>;
 }
 
 export function execute(
   program: Program,
   options?: ExecuteOptions,
 ): ScopeResult[] {
-  const interpreter = new Interpreter();
+  const interpreter = new Interpreter(options?.builtins);
 
   let globalEnv: Environment | undefined;
   if (options?.variables) {

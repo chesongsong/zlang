@@ -1,8 +1,12 @@
 import * as monaco from "monaco-editor";
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import { run } from "@z-lang/core";
+import { run, defineRenderable } from "@z-lang/core";
 import { RenderEngine } from "@z-lang/render";
 import { ElementComponentFactory } from "./renderers/element-factory";
+import { ElementTableRenderer } from "./renderers/element-table-renderer";
+import { TlinkRenderer } from "./renderers/tlink-renderer";
+import { ButtonRenderer } from "./renderers/button-renderer";
+import { rtable } from "./renderables/rtable";
 import { registerZLang, createZLangTheme, ZLANG_ID } from "./monaco-lang";
 import "./style.css";
 
@@ -19,7 +23,24 @@ const editorContainer = document.getElementById("editor")!;
 const output = document.getElementById("output-content")!;
 const divider = document.getElementById("divider")!;
 
-const renderEngine = new RenderEngine(new ElementComponentFactory());
+const tlink = defineRenderable("tlink", (args) => ({
+  text: args[0] as string,
+  url: args[1] as string,
+}));
+
+const button = defineRenderable("button", (args, named) => ({
+  text: (named.text as string) ?? (args[0] as string) ?? "Button",
+  type: (named.type as string) ?? (args[1] as string) ?? "primary",
+  size: (named.size as string) ?? (args[2] as string) ?? "default",
+  onClick: (named.onClick as string) ?? (args[3] as string),
+}));
+
+const factory = new ElementComponentFactory();
+factory.registerRenderer("rtable", () => new ElementTableRenderer());
+factory.registerRenderer("tlink", () => new TlinkRenderer());
+factory.registerRenderer("button", () => new ButtonRenderer());
+
+const renderEngine = new RenderEngine(factory);
 
 const jsData = {
   用户列表: [
@@ -76,6 +97,45 @@ rtable(用户列表)
 \`\`\`z-lang
 rtable(用户列表, 姓名, 薪资)
 \`\`\`
+
+## 自定义渲染组件
+
+通过 \`defineRenderable\` 注册的 \`tlink\` 关键字：
+
+\`\`\`z-lang
+tlink("访问百度", "https://www.baidu.com")
+\`\`\`
+
+\`\`\`z-lang
+tlink("Z-Lang GitHub", "https://github.com")
+\`\`\`
+
+## Element Plus 按钮
+
+通过 \`defineRenderable\` 注册的 \`button\` 关键字：
+
+\`\`\`z-lang
+button("点击我")
+\`\`\`
+
+\`\`\`z-lang
+button(text = "成功按钮", type = "success")
+\`\`\`
+
+\`\`\`z-lang
+button(text = "危险操作", type = "danger", size = "large", onClick = "你点击了危险按钮！")
+\`\`\`
+
+\`\`\`z-lang
+button("警告", "warning", "small")
+\`\`\`
+
+## 骨架屏（流式输出模拟）
+
+下面是一个未闭合的代码块，模拟 AI 正在流式输出的场景：
+
+\`\`\`z-lang
+rtable(用户列表, 姓名, 薪资)
 `;
 
 const editor = monaco.editor.create(editorContainer, {
@@ -113,7 +173,7 @@ function execute() {
   const source = editor.getValue();
 
   try {
-    const { segments, errors } = run(source, { variables: jsData });
+    const { segments, errors } = run(source, { variables: jsData, builtins: [rtable, tlink, button] });
     renderEngine.renderSegments(segments, errors, output);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);

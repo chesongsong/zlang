@@ -359,6 +359,22 @@ html, body {
   100% { background-position: -200% 0; }
 }
 
+/* Custom renderable: tlink */
+.zlang-tlink {
+  display: inline-block;
+  color: #409eff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 14px;
+  padding: 2px 0;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.zlang-tlink:hover {
+  color: #66b1ff;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   #main {

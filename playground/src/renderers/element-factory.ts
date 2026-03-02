@@ -7,13 +7,13 @@ import type {
 import { MarkdownRenderer } from "./markdown-renderer.js";
 import { CodeBlockRenderer } from "./code-block-renderer.js";
 import { PendingRenderer } from "./pending-renderer.js";
-import { ElementTableRenderer } from "./element-table-renderer.js";
-
-const renderableRenderers: Record<string, () => ComponentRenderer> = {
-  rtable: () => new ElementTableRenderer(),
-};
-
 export class ElementComponentFactory implements ComponentFactory {
+  private readonly renderers = new Map<string, () => ComponentRenderer>();
+
+  registerRenderer(type: string, factory: () => ComponentRenderer): void {
+    this.renderers.set(type, factory);
+  }
+
   createMarkdownRenderer(): ComponentRenderer<string> {
     return new MarkdownRenderer();
   }
@@ -27,7 +27,7 @@ export class ElementComponentFactory implements ComponentFactory {
   }
 
   createRenderer(type: string): ComponentRenderer | null {
-    const factory = renderableRenderers[type];
+    const factory = this.renderers.get(type);
     return factory ? factory() : null;
   }
 }

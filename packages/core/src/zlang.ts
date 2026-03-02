@@ -5,10 +5,11 @@ import {
 import type { TokenInfo } from "@z-lang/parser";
 import { ASTBuilder, ScopeResolver } from "@z-lang/ast";
 import { execute } from "@z-lang/interpreter";
-import type { OutputSegment, ExecuteOptions } from "@z-lang/interpreter";
+import type { OutputSegment, ExecuteOptions, BuiltinFunction } from "@z-lang/interpreter";
 import type { Program } from "@z-lang/types";
 import { ParseError } from "@z-lang/types";
 import { SourceSplitter } from "./splitter.js";
+import type { RenderableDefinition } from "./define-renderable.js";
 
 export interface ParseOptions {
   readonly sourceName?: string;
@@ -16,6 +17,7 @@ export interface ParseOptions {
 
 export interface RunOptions extends ParseOptions {
   readonly variables?: Record<string, unknown>;
+  readonly builtins?: RenderableDefinition[];
 }
 
 export interface ParseOutput {
@@ -54,9 +56,18 @@ export function run(source: string, options?: RunOptions): RunOutput {
   const allErrors: ParseError[] = [];
   let scopeIndex = 0;
 
-  const execOptions: ExecuteOptions | undefined = options?.variables
-    ? { variables: options.variables }
-    : undefined;
+  let builtinsMap: Map<string, BuiltinFunction> | undefined;
+  if (options?.builtins && options.builtins.length > 0) {
+    builtinsMap = new Map();
+    for (const def of options.builtins) {
+      builtinsMap.set(def.name, def.builtin);
+    }
+  }
+
+  const execOptions: ExecuteOptions | undefined =
+    options?.variables || builtinsMap
+      ? { variables: options?.variables, builtins: builtinsMap }
+      : undefined;
 
   for (const seg of rawSegments) {
     if (seg.type === "markdown") {

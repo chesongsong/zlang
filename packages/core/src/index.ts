@@ -21,12 +21,16 @@ export {
 } from "@z-lang/interpreter";
 
 // Renderables — UI-renderable value types
-export { ZRenderable, ZRenderTable } from "@z-lang/interpreter";
+export { ZRenderable, ZRenderCustom } from "@z-lang/interpreter";
+
+// Renderable definition API
+export { defineRenderable } from "./define-renderable.js";
 export type {
-  TableColumn,
-  RenderTableData,
-  RenderTableColumn,
-} from "@z-lang/interpreter";
+  RenderableDefinition,
+  RenderableHandler,
+  RenderableContext,
+  AdvancedRenderableHandler,
+} from "./define-renderable.js";
 
 // Interpreter & execution
 export { Interpreter, execute } from "@z-lang/interpreter";
@@ -39,7 +43,7 @@ export type {
 } from "@z-lang/interpreter";
 
 // Builtins
-export { BuiltinRegistry, RtableBuiltin } from "@z-lang/interpreter";
+export { BuiltinRegistry } from "@z-lang/interpreter";
 export type { BuiltinFunction, Evaluator } from "@z-lang/interpreter";
 
 // Environment
