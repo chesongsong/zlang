@@ -46,11 +46,14 @@ export class Interpreter implements Evaluator {
     this.builtins.register("rtable", new RtableBuiltin());
   }
 
-  executeProgram(program: Program): ScopeResult[] {
+  executeProgram(
+    program: Program,
+    globalEnv?: Environment,
+  ): ScopeResult[] {
     const results: ScopeResult[] = [];
     for (let i = 0; i < program.body.length; i++) {
       try {
-        const value = this.executeScopeBlock(program.body[i]!);
+        const value = this.executeScopeBlock(program.body[i]!, globalEnv);
         results.push({ index: i, value });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -60,8 +63,11 @@ export class Interpreter implements Evaluator {
     return results;
   }
 
-  private executeScopeBlock(scope: ScopeBlock): ZValue {
-    const env = new Environment();
+  private executeScopeBlock(
+    scope: ScopeBlock,
+    parentEnv?: Environment,
+  ): ZValue {
+    const env = parentEnv ? new Environment(parentEnv) : new Environment();
     let lastValue: ZValue = ZNull.instance;
     for (const stmt of scope.body) {
       lastValue = this.executeStatement(stmt, env);

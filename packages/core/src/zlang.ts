@@ -5,13 +5,17 @@ import {
 import type { TokenInfo } from "@z-lang/parser";
 import { ASTBuilder, ScopeResolver } from "@z-lang/ast";
 import { execute } from "@z-lang/interpreter";
-import type { OutputSegment } from "@z-lang/interpreter";
+import type { OutputSegment, ExecuteOptions } from "@z-lang/interpreter";
 import type { Program } from "@z-lang/types";
 import { ParseError } from "@z-lang/types";
 import { SourceSplitter } from "./splitter.js";
 
 export interface ParseOptions {
   readonly sourceName?: string;
+}
+
+export interface RunOptions extends ParseOptions {
+  readonly variables?: Record<string, unknown>;
 }
 
 export interface ParseOutput {
@@ -43,12 +47,16 @@ export function parse(source: string, _options?: ParseOptions): ParseOutput {
   return { ast, errors: [] };
 }
 
-export function run(source: string, _options?: ParseOptions): RunOutput {
+export function run(source: string, options?: RunOptions): RunOutput {
   const splitter = new SourceSplitter();
   const rawSegments = splitter.split(source);
   const outputSegments: OutputSegment[] = [];
   const allErrors: ParseError[] = [];
   let scopeIndex = 0;
+
+  const execOptions: ExecuteOptions | undefined = options?.variables
+    ? { variables: options.variables }
+    : undefined;
 
   for (const seg of rawSegments) {
     if (seg.type === "markdown") {
@@ -75,14 +83,14 @@ export function run(source: string, _options?: ParseOptions): RunOutput {
     }
 
     const wrappedSource = "```" + seg.content + "```";
-    const { ast, errors } = parse(wrappedSource, _options);
+    const { ast, errors } = parse(wrappedSource, options);
 
     if (errors.length > 0) {
       allErrors.push(...errors);
       continue;
     }
 
-    const scopeResults = execute(ast);
+    const scopeResults = execute(ast, execOptions);
     for (const result of scopeResults) {
       outputSegments.push({
         type: "scope",

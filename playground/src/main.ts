@@ -21,13 +21,21 @@ const divider = document.getElementById("divider")!;
 
 const renderEngine = new RenderEngine(new ElementComponentFactory());
 
+const jsData = {
+  用户列表: [
+    { 姓名: "张三", 部门: "工程部", 薪资: 25000 },
+    { 姓名: "李四", 部门: "设计部", 薪资: 22000 },
+    { 姓名: "王五", 部门: "产品部", 薪资: 28000 },
+    { 姓名: "赵六", 部门: "工程部", 薪资: 30000 },
+  ],
+  公司名: "Z-Lang 科技",
+};
+
 const DEFAULT_CODE = `# z-lang Playground
 
 欢迎使用 z-lang，支持混合 Markdown 和代码。
 
 ## 执行 z-lang 代码
-
-使用空语言标记或 \`z-lang\` 标记的代码块会被执行：
 
 \`\`\`z-lang
 名字 = "World"
@@ -37,28 +45,23 @@ const DEFAULT_CODE = `# z-lang Playground
 
 ## 普通代码块（仅展示）
 
-其他语言标记的代码块会保留原样展示：
-
 \`\`\`python
 def greet(name):
     return f"Hello, {name}!"
 \`\`\`
 
-## rtable 渲染表格
+## JS 注入变量 → z-lang 渲染
+
+以下变量由 JS 注入：\`公司名\`、\`用户列表\`
 
 \`\`\`
-records = [{ 姓名: "Alice", 年龄: 25 }, { 姓名: "Bob", 年龄: 30 }, { 姓名: "Charlie", 年龄: 28 }]
-rtable(records, 姓名 = 自己.姓名, 年龄 = 自己.年龄)
+标题 = 公司名 + " - 员工花名册"
+标题
 \`\`\`
 
-## 骨架屏演示
-
-当 z-lang 代码块未闭合时，会显示骨架屏（模拟流式输出）：
-
-\`\`\`z-lang
-数据 = [1, 2, 3, 4, 5]
-总和 = 0
-// 模拟 AI 正在生成更多代码...
+\`\`\`
+rtable(用户列表, 姓名 = 自己.姓名, 部门 = 自己.部门, 薪资 = 自己.薪资)
+\`\`\`
 `;
 
 const editor = monaco.editor.create(editorContainer, {
@@ -96,7 +99,7 @@ function execute() {
   const source = editor.getValue();
 
   try {
-    const { segments, errors } = run(source);
+    const { segments, errors } = run(source, { variables: jsData });
     renderEngine.renderSegments(segments, errors, output);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);

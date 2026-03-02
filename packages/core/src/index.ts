@@ -1,6 +1,6 @@
 // High-level API
 export { parse, run, tokenize } from "./zlang.js";
-export type { ParseOptions, ParseOutput, RunOutput } from "./zlang.js";
+export type { ParseOptions, RunOptions, ParseOutput, RunOutput } from "./zlang.js";
 
 // AST builder, scope resolver & visitor
 export { ASTBuilder, ScopeResolver } from "@z-lang/ast";
@@ -31,6 +31,7 @@ export type {
 // Interpreter & execution
 export { Interpreter, execute } from "@z-lang/interpreter";
 export type {
+  ExecuteOptions,
   ScopeResult,
   OutputSegment,
   MarkdownSegment,

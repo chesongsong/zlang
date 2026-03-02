@@ -45,10 +45,28 @@ export { Interpreter } from "./interpreter.js";
 
 // Convenience entry point
 import { Interpreter } from "./interpreter.js";
+import { Environment } from "./environment.js";
+import { box } from "./values/index.js";
 import type { Program } from "@z-lang/types";
 import type { ScopeResult } from "./segments.js";
 
-export function execute(program: Program): ScopeResult[] {
+export interface ExecuteOptions {
+  readonly variables?: Record<string, unknown>;
+}
+
+export function execute(
+  program: Program,
+  options?: ExecuteOptions,
+): ScopeResult[] {
   const interpreter = new Interpreter();
-  return interpreter.executeProgram(program);
+
+  let globalEnv: Environment | undefined;
+  if (options?.variables) {
+    globalEnv = new Environment();
+    for (const [name, value] of Object.entries(options.variables)) {
+      globalEnv.define(name, box(value));
+    }
+  }
+
+  return interpreter.executeProgram(program, globalEnv);
 }
