@@ -2,6 +2,31 @@
 export { parse, run, tokenize } from "./zlang.js";
 export type { ParseOptions, RunOptions, ParseOutput, RunOutput } from "./zlang.js";
 
+// Application facade
+export { ZLangApp } from "./app.js";
+
+// Component definition API (all-in-one: setup + render)
+export { defineComponent } from "./define-component.js";
+export type {
+  ComponentDefinition,
+  ComponentOptions,
+  SimpleComponentOptions,
+  AdvancedComponentOptions,
+  SimpleSetup,
+  AdvancedSetup,
+  RenderFn,
+} from "./define-component.js";
+
+// Render types (re-export for convenience)
+export type {
+  Disposable,
+  ComponentRenderer,
+  ComponentFactory,
+  CodeBlockData,
+  PendingData,
+} from "@z-lang/render";
+export { RenderEngine } from "@z-lang/render";
+
 // AST builder, scope resolver & visitor
 export { ASTBuilder, ScopeResolver } from "@z-lang/ast";
 export { type ASTVisitor, visitNode } from "@z-lang/ast";

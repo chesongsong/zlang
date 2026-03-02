@@ -1,12 +1,17 @@
-import type { ComponentRenderer, Disposable } from "@z-lang/render";
+import { defineComponent } from "@z-lang/core";
 
-export interface TlinkData {
+interface TlinkData {
   readonly text: string;
   readonly url: string;
 }
 
-export class TlinkRenderer implements ComponentRenderer<TlinkData> {
-  render(data: TlinkData, container: HTMLElement): Disposable {
+export const tlink = defineComponent<TlinkData>("tlink", {
+  setup: (args) => ({
+    text: args[0] as string,
+    url: args[1] as string,
+  }),
+
+  render(data, container) {
     const link = document.createElement("a");
     link.href = data.url;
     link.textContent = data.text;
@@ -16,5 +21,5 @@ export class TlinkRenderer implements ComponentRenderer<TlinkData> {
     container.appendChild(link);
 
     return { dispose: () => link.remove() };
-  }
-}
+  },
+});

@@ -1,18 +1,25 @@
-import { createApp, defineComponent, h } from "vue";
+import { createApp, defineComponent as vueDefineComponent, h } from "vue";
 import { ElButton } from "element-plus";
 import "element-plus/es/components/button/style/css";
-import type { ComponentRenderer, Disposable } from "@z-lang/render";
+import { defineComponent } from "@z-lang/core";
 
-export interface ButtonData {
+interface ButtonData {
   readonly text: string;
-  readonly type?: "primary" | "success" | "warning" | "danger" | "info";
-  readonly size?: "large" | "default" | "small";
+  readonly type: string;
+  readonly size: string;
   readonly onClick?: string;
 }
 
-export class ButtonRenderer implements ComponentRenderer<ButtonData> {
-  render(data: ButtonData, container: HTMLElement): Disposable {
-    const ButtonWrapper = defineComponent({
+export const button = defineComponent<ButtonData>("button", {
+  setup: (args, named) => ({
+    text: (named.text as string) ?? (args[0] as string) ?? "Button",
+    type: (named.type as string) ?? (args[1] as string) ?? "primary",
+    size: (named.size as string) ?? (args[2] as string) ?? "default",
+    onClick: (named.onClick as string) ?? (args[3] as string),
+  }),
+
+  render(data, container) {
+    const ButtonWrapper = vueDefineComponent({
       setup() {
         const handleClick = () => {
           if (data.onClick) {
@@ -36,7 +43,6 @@ export class ButtonRenderer implements ComponentRenderer<ButtonData> {
     const mountEl = document.createElement("div");
     mountEl.style.padding = "4px 0";
     container.appendChild(mountEl);
-
     const app = createApp(ButtonWrapper);
     app.mount(mountEl);
 
@@ -46,5 +52,5 @@ export class ButtonRenderer implements ComponentRenderer<ButtonData> {
         mountEl.remove();
       },
     };
-  }
-}
+  },
+});

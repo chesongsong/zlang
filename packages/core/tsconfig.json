@@ -9,6 +9,7 @@
     { "path": "../types" },
     { "path": "../parser" },
     { "path": "../ast" },
-    { "path": "../interpreter" }
+    { "path": "../interpreter" },
+    { "path": "../render" }
   ]
 }

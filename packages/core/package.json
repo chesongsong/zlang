@@ -20,6 +20,7 @@
     "@z-lang/parser": "*",
     "@z-lang/ast": "*",
     "@z-lang/interpreter": "*",
+    "@z-lang/render": "*",
     "antlr4ng": "^3.0.16"
   }
 }
